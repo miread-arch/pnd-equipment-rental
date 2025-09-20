@@ -1,13 +1,13 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { User, Lock, Eye, EyeOff, Shield } from "lucide-react";
+import { User, Lock, Eye, EyeOff } from "lucide-react";
 import PNDLogo from "./PNDLogo";
-import { SecurityLogger } from "../utils/securityLogger";
+import { SimpleLogger } from "../utils/simpleLogger";
 
 interface LoginFormProps {
   onLogin: (daouId: string, name: string, department: string) => void;
@@ -20,8 +20,6 @@ export default function LoginForm({ onLogin }: LoginFormProps) {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
-  const [isBlocked, setIsBlocked] = useState(false);
-  const [blockTimeRemaining, setBlockTimeRemaining] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
   
   // Default admin password (in real app, this would be stored securely on backend)
@@ -29,47 +27,8 @@ export default function LoginForm({ onLogin }: LoginFormProps) {
   
   // Check if current department requires password
   const requiresPassword = department === "상품운용팀";
-  
-  // Check for IP block status on component mount and department change
-  useEffect(() => {
-    const checkBlockStatus = async () => {
-      if (requiresPassword) {
-        const blockStatus = await SecurityLogger.isBlocked();
-        setIsBlocked(blockStatus.blocked);
-        if (blockStatus.blocked && blockStatus.remainingTime) {
-          setBlockTimeRemaining(blockStatus.remainingTime);
-          setError(`로그인이 일시적으로 제한되었습니다. ${Math.ceil(blockStatus.remainingTime / 60)}분 후 다시 시도해주세요.`);
-        }
-      } else {
-        setIsBlocked(false);
-        setBlockTimeRemaining(0);
-      }
-    };
-    
-    checkBlockStatus();
-  }, [requiresPassword]);
-  
-  // Countdown timer for blocked state
-  useEffect(() => {
-    if (isBlocked && blockTimeRemaining > 0) {
-      const timer = setInterval(() => {
-        setBlockTimeRemaining(prev => {
-          if (prev <= 1) {
-            setIsBlocked(false);
-            setError("");
-            return 0;
-          }
-          const newTime = prev - 1;
-          setError(`로그인이 일시적으로 제한되었습니다. ${Math.ceil(newTime / 60)}분 후 다시 시도해주세요.`);
-          return newTime;
-        });
-      }, 1000);
-      
-      return () => clearInterval(timer);
-    }
-  }, [isBlocked, blockTimeRemaining]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
     setIsLoading(true);
@@ -85,34 +44,21 @@ export default function LoginForm({ onLogin }: LoginFormProps) {
       // Password validation for admin department
       if (requiresPassword) {
         if (!password) {
-          await SecurityLogger.recordLoginAttempt(daouId, department, false, "패스워드 미입력");
           setError("패스워드를 입력해주세요.");
           setIsLoading(false);
           return;
         }
         
         if (password !== ADMIN_PASSWORD) {
-          const result = await SecurityLogger.recordLoginAttempt(daouId, department, false, "잘못된 패스워드");
-          
-          if (!result.success) {
-            setError(result.error || "패스워드가 올바르지 않습니다.");
-            
-            if (result.remainingTime) {
-              setIsBlocked(true);
-              setBlockTimeRemaining(result.remainingTime);
-            }
-            
-            setIsLoading(false);
-            return;
-          }
+          setError("패스워드가 올바르지 않습니다.");
+          setIsLoading(false);
+          return;
         }
-        
-        // Record successful admin login
-        await SecurityLogger.recordLoginAttempt(daouId, department, true, "관리자 로그인 성공");
-      } else {
-        // Record successful user login
-        await SecurityLogger.recordLoginAttempt(daouId, department, true, "사용자 로그인 성공");
       }
+      
+      // Record successful login and get role
+      const role = requiresPassword ? 'admin' : 'user';
+      SimpleLogger.recordLogin(daouId, name, department, role);
       
       onLogin(daouId, name, department);
     } catch (error) {
@@ -224,10 +170,7 @@ export default function LoginForm({ onLogin }: LoginFormProps) {
             {/* Error Message */}
             {error && (
               <Alert variant="destructive" className="animate-in slide-in-from-top-2 duration-300">
-                <AlertDescription data-testid="text-error" className="flex items-center gap-2">
-                  {isBlocked && <Shield className="h-4 w-4" />}
-                  {error}
-                </AlertDescription>
+                <AlertDescription data-testid="text-error">{error}</AlertDescription>
               </Alert>
             )}
             
@@ -235,9 +178,9 @@ export default function LoginForm({ onLogin }: LoginFormProps) {
               type="submit" 
               className="w-full" 
               data-testid="button-login"
-              disabled={isLoading || isBlocked || !daouId || !name || !department || (requiresPassword && !password)}
+              disabled={isLoading || !daouId || !name || !department || (requiresPassword && !password)}
             >
-              {isLoading ? "로그인 중..." : isBlocked ? `${Math.ceil(blockTimeRemaining / 60)}분 후 다시 시도` : "로그인"}
+              {isLoading ? "로그인 중..." : "로그인"}
             </Button>
           </form>
         </CardContent>

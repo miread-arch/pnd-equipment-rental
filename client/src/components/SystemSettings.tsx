@@ -1,9 +1,9 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Settings, Image, Mail, Users, Shield, Activity } from "lucide-react";
+import { Settings, Image, Mail, Users, Shield, ClipboardList } from "lucide-react";
 import LogoUpload from "./LogoUpload";
 import PasswordManagement from "./PasswordManagement";
-import SecurityLogs from "./SecurityLogs";
+import AccessLogs from "./AccessLogs";
 
 export default function SystemSettings() {
   return (
@@ -23,9 +23,9 @@ export default function SystemSettings() {
             <Shield className="h-4 w-4" />
             비밀번호
           </TabsTrigger>
-          <TabsTrigger value="security" className="flex items-center gap-2">
-            <Activity className="h-4 w-4" />
-            보안 로그
+          <TabsTrigger value="access" className="flex items-center gap-2">
+            <ClipboardList className="h-4 w-4" />
+            접근 기록
           </TabsTrigger>
           <TabsTrigger value="email" className="flex items-center gap-2">
             <Mail className="h-4 w-4" />
@@ -49,8 +49,8 @@ export default function SystemSettings() {
           <PasswordManagement />
         </TabsContent>
         
-        <TabsContent value="security" className="space-y-6">
-          <SecurityLogs />
+        <TabsContent value="access" className="space-y-6">
+          <AccessLogs />
         </TabsContent>
         
         <TabsContent value="email" className="space-y-6">

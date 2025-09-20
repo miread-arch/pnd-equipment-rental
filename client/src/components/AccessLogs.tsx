@@ -6,29 +6,29 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { 
+  ClipboardList, 
+  Users, 
   Shield, 
-  CheckCircle, 
-  XCircle, 
-  Clock, 
   Trash2, 
   RefreshCw, 
   Download,
-  AlertTriangle,
-  Activity
+  User,
+  Clock
 } from "lucide-react";
 import { format } from "date-fns";
 import { ko } from "date-fns/locale";
-import { SecurityLogger, SecurityLogEntry } from "../utils/securityLogger";
+import { SimpleLogger, AccessLogEntry } from "../utils/simpleLogger";
 import { useToast } from "@/hooks/use-toast";
 
-export default function SecurityLogs() {
-  const [logs, setLogs] = useState<SecurityLogEntry[]>([]);
-  const [filteredLogs, setFilteredLogs] = useState<SecurityLogEntry[]>([]);
-  const [filterAction, setFilterAction] = useState<string>("all");
+export default function AccessLogs() {
+  const [logs, setLogs] = useState<AccessLogEntry[]>([]);
+  const [filteredLogs, setFilteredLogs] = useState<AccessLogEntry[]>([]);
+  const [filterRole, setFilterRole] = useState<string>("all");
   const [stats, setStats] = useState({
-    totalAttempts: 0,
-    blockedIPs: 0,
-    recentFailures: 0
+    totalLogins: 0,
+    adminLogins: 0,
+    userLogins: 0,
+    todayLogins: 0
   });
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
@@ -36,17 +36,17 @@ export default function SecurityLogs() {
   const loadLogs = () => {
     setIsLoading(true);
     try {
-      const securityLogs = SecurityLogger.getSecurityLogs();
-      const logStats = SecurityLogger.getAttemptStats();
+      const accessLogs = SimpleLogger.getAccessLogs();
+      const logStats = SimpleLogger.getStats();
       
-      setLogs(securityLogs);
+      setLogs(accessLogs);
       setStats(logStats);
-      applyFilters(securityLogs, filterAction);
+      applyFilters(accessLogs, filterRole);
     } catch (error) {
-      console.error('Error loading security logs:', error);
+      console.error('Error loading access logs:', error);
       toast({
         title: "로그 로딩 실패",
-        description: "보안 로그를 불러오는 중 오류가 발생했습니다.",
+        description: "접근 로그를 불러오는 중 오류가 발생했습니다.",
         variant: "destructive",
       });
     } finally {
@@ -54,31 +54,31 @@ export default function SecurityLogs() {
     }
   };
 
-  const applyFilters = (allLogs: SecurityLogEntry[], action: string) => {
+  const applyFilters = (allLogs: AccessLogEntry[], role: string) => {
     let filtered = allLogs;
     
-    if (action !== "all") {
-      filtered = allLogs.filter(log => log.action === action);
+    if (role !== "all") {
+      filtered = allLogs.filter(log => log.role === role);
     }
     
     setFilteredLogs(filtered);
   };
 
-  const handleFilterChange = (action: string) => {
-    setFilterAction(action);
-    applyFilters(logs, action);
+  const handleFilterChange = (role: string) => {
+    setFilterRole(role);
+    applyFilters(logs, role);
   };
 
   const handleClearLogs = () => {
-    if (window.confirm("모든 보안 로그를 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.")) {
-      SecurityLogger.clearLogs();
+    if (window.confirm("모든 접근 로그를 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.")) {
+      SimpleLogger.clearLogs();
       setLogs([]);
       setFilteredLogs([]);
-      setStats({ totalAttempts: 0, blockedIPs: 0, recentFailures: 0 });
+      setStats({ totalLogins: 0, adminLogins: 0, userLogins: 0, todayLogins: 0 });
       
       toast({
         title: "로그 삭제 완료",
-        description: "모든 보안 로그가 삭제되었습니다.",
+        description: "모든 접근 로그가 삭제되었습니다.",
       });
     }
   };
@@ -91,7 +91,7 @@ export default function SecurityLogs() {
       
       const link = document.createElement("a");
       link.href = url;
-      link.download = `security_logs_${format(new Date(), "yyyy-MM-dd_HH-mm-ss")}.json`;
+      link.download = `access_logs_${format(new Date(), "yyyy-MM-dd_HH-mm-ss")}.json`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
@@ -99,7 +99,7 @@ export default function SecurityLogs() {
       
       toast({
         title: "로그 내보내기 완료",
-        description: "보안 로그가 JSON 파일로 저장되었습니다.",
+        description: "접근 로그가 JSON 파일로 저장되었습니다.",
       });
     } catch (error) {
       console.error('Error exporting logs:', error);
@@ -111,66 +111,41 @@ export default function SecurityLogs() {
     }
   };
 
-  const getActionIcon = (action: SecurityLogEntry['action']) => {
-    switch (action) {
-      case 'login_success':
-        return <CheckCircle className="h-4 w-4 text-green-600" />;
-      case 'login_failure':
-        return <XCircle className="h-4 w-4 text-red-600" />;
-      case 'login_blocked':
-        return <Shield className="h-4 w-4 text-orange-600" />;
-      default:
-        return <Clock className="h-4 w-4 text-gray-600" />;
-    }
+  const getRoleIcon = (role: 'admin' | 'user') => {
+    return role === 'admin' ? 
+      <Shield className="h-4 w-4 text-blue-600" /> : 
+      <User className="h-4 w-4 text-green-600" />;
   };
 
-  const getActionBadgeVariant = (action: SecurityLogEntry['action']): "default" | "secondary" | "destructive" | "outline" => {
-    switch (action) {
-      case 'login_success':
-        return "default";
-      case 'login_failure':
-        return "destructive";
-      case 'login_blocked':
-        return "secondary";
-      default:
-        return "outline";
-    }
+  const getRoleBadgeVariant = (role: 'admin' | 'user'): "default" | "secondary" => {
+    return role === 'admin' ? "default" : "secondary";
   };
 
-  const getActionText = (action: SecurityLogEntry['action']) => {
-    switch (action) {
-      case 'login_success':
-        return "로그인 성공";
-      case 'login_failure':
-        return "로그인 실패";
-      case 'login_blocked':
-        return "로그인 차단";
-      default:
-        return action;
-    }
+  const getRoleText = (role: 'admin' | 'user') => {
+    return role === 'admin' ? "관리자" : "사용자";
   };
 
   useEffect(() => {
     loadLogs();
     
-    // Auto-refresh every 30 seconds
-    const interval = setInterval(loadLogs, 30000);
+    // Auto-refresh every 60 seconds for simple logs
+    const interval = setInterval(loadLogs, 60000);
     return () => clearInterval(interval);
   }, []);
 
   return (
     <div className="space-y-6">
       {/* Statistics Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center gap-3">
               <div className="p-2 bg-blue-100 dark:bg-blue-900 rounded-lg">
-                <Activity className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                <ClipboardList className="h-5 w-5 text-blue-600 dark:text-blue-400" />
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">총 로그인 시도</p>
-                <p className="text-2xl font-semibold">{stats.totalAttempts}</p>
+                <p className="text-sm text-muted-foreground">총 접속</p>
+                <p className="text-2xl font-semibold">{stats.totalLogins}</p>
               </div>
             </div>
           </CardContent>
@@ -179,43 +154,57 @@ export default function SecurityLogs() {
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center gap-3">
-              <div className="p-2 bg-red-100 dark:bg-red-900 rounded-lg">
-                <Shield className="h-5 w-5 text-red-600 dark:text-red-400" />
+              <div className="p-2 bg-purple-100 dark:bg-purple-900 rounded-lg">
+                <Shield className="h-5 w-5 text-purple-600 dark:text-purple-400" />
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">차단된 IP</p>
-                <p className="text-2xl font-semibold">{stats.blockedIPs}</p>
+                <p className="text-sm text-muted-foreground">관리자 접속</p>
+                <p className="text-2xl font-semibold">{stats.adminLogins}</p>
               </div>
             </div>
           </CardContent>
         </Card>
         
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-green-100 dark:bg-green-900 rounded-lg">
+                <Users className="h-5 w-5 text-green-600 dark:text-green-400" />
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground">사용자 접속</p>
+                <p className="text-2xl font-semibold">{stats.userLogins}</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center gap-3">
               <div className="p-2 bg-orange-100 dark:bg-orange-900 rounded-lg">
-                <AlertTriangle className="h-5 w-5 text-orange-600 dark:text-orange-400" />
+                <Clock className="h-5 w-5 text-orange-600 dark:text-orange-400" />
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">최근 1시간 실패</p>
-                <p className="text-2xl font-semibold">{stats.recentFailures}</p>
+                <p className="text-sm text-muted-foreground">오늘 접속</p>
+                <p className="text-2xl font-semibold">{stats.todayLogins}</p>
               </div>
             </div>
           </CardContent>
         </Card>
       </div>
 
-      {/* Main Security Logs Table */}
+      {/* Main Access Logs Table */}
       <Card>
         <CardHeader>
           <div className="flex items-center justify-between">
             <div>
               <CardTitle className="flex items-center gap-2">
-                <Shield className="h-5 w-5" />
-                보안 로그
+                <ClipboardList className="h-5 w-5" />
+                접근 기록
               </CardTitle>
               <CardDescription>
-                로그인 시도 기록 및 보안 이벤트 {filteredLogs.length}건
+                시스템 접근 기록 {filteredLogs.length}건
               </CardDescription>
             </div>
             <div className="flex items-center gap-2">
@@ -256,24 +245,23 @@ export default function SecurityLogs() {
         <CardContent>
           {/* Filters */}
           <div className="flex gap-4 mb-4">
-            <Select value={filterAction} onValueChange={handleFilterChange}>
-              <SelectTrigger className="w-48" data-testid="select-filter-action">
-                <SelectValue placeholder="전체 액션" />
+            <Select value={filterRole} onValueChange={handleFilterChange}>
+              <SelectTrigger className="w-48" data-testid="select-filter-role">
+                <SelectValue placeholder="전체 역할" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">전체 액션</SelectItem>
-                <SelectItem value="login_success">로그인 성공</SelectItem>
-                <SelectItem value="login_failure">로그인 실패</SelectItem>
-                <SelectItem value="login_blocked">로그인 차단</SelectItem>
+                <SelectItem value="all">전체 역할</SelectItem>
+                <SelectItem value="admin">관리자</SelectItem>
+                <SelectItem value="user">사용자</SelectItem>
               </SelectContent>
             </Select>
           </div>
 
           {filteredLogs.length === 0 ? (
             <Alert>
-              <AlertTriangle className="h-4 w-4" />
+              <ClipboardList className="h-4 w-4" />
               <AlertDescription>
-                보안 로그가 없습니다. 로그인 시도가 발생하면 여기에 기록됩니다.
+                접근 기록이 없습니다. 사용자가 로그인하면 여기에 기록됩니다.
               </AlertDescription>
             </Alert>
           ) : (
@@ -281,12 +269,12 @@ export default function SecurityLogs() {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>시간</TableHead>
-                    <TableHead>IP 주소</TableHead>
+                    <TableHead>접속 시간</TableHead>
                     <TableHead>사용자 ID</TableHead>
+                    <TableHead>이름</TableHead>
                     <TableHead>부서</TableHead>
-                    <TableHead>액션</TableHead>
-                    <TableHead>상세 정보</TableHead>
+                    <TableHead>역할</TableHead>
+                    <TableHead>세션 ID</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -295,11 +283,11 @@ export default function SecurityLogs() {
                       <TableCell className="font-mono text-sm">
                         {format(log.timestamp, "yyyy-MM-dd HH:mm:ss", { locale: ko })}
                       </TableCell>
-                      <TableCell className="font-mono text-sm">
-                        {log.ipAddress}
-                      </TableCell>
                       <TableCell className="font-medium">
                         {log.daouId}
+                      </TableCell>
+                      <TableCell>
+                        {log.name}
                       </TableCell>
                       <TableCell>
                         <Badge variant="outline" className="text-xs">
@@ -308,25 +296,16 @@ export default function SecurityLogs() {
                       </TableCell>
                       <TableCell>
                         <Badge
-                          variant={getActionBadgeVariant(log.action)}
+                          variant={getRoleBadgeVariant(log.role)}
                           className="flex items-center gap-1 w-fit"
-                          data-testid={`badge-action-${log.id}`}
+                          data-testid={`badge-role-${log.id}`}
                         >
-                          {getActionIcon(log.action)}
-                          {getActionText(log.action)}
+                          {getRoleIcon(log.role)}
+                          {getRoleText(log.role)}
                         </Badge>
                       </TableCell>
-                      <TableCell className="text-sm text-muted-foreground max-w-xs">
-                        {log.reason && (
-                          <span className="block truncate" title={log.reason}>
-                            {log.reason}
-                          </span>
-                        )}
-                        {log.sessionId && (
-                          <span className="text-xs font-mono opacity-70">
-                            세션: {log.sessionId}
-                          </span>
-                        )}
+                      <TableCell className="font-mono text-xs text-muted-foreground">
+                        {log.sessionId}
                       </TableCell>
                     </TableRow>
                   ))}
@@ -337,30 +316,30 @@ export default function SecurityLogs() {
         </CardContent>
       </Card>
 
-      {/* Security Information */}
+      {/* Simple Information */}
       <Card>
         <CardHeader>
-          <CardTitle>보안 정책</CardTitle>
+          <CardTitle>시스템 정보</CardTitle>
           <CardDescription>
-            현재 적용 중인 보안 정책 및 제한 사항
+            접근 기록 관리 및 시스템 운영 정보
           </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <h4 className="font-medium mb-2">로그인 제한 정책</h4>
+              <h4 className="font-medium mb-2">접근 기록</h4>
               <ul className="text-sm text-muted-foreground space-y-1">
-                <li>• 최대 실패 횟수: 3회</li>
-                <li>• 차단 시간: 5분</li>
-                <li>• IP 기반 차단</li>
-                <li>• 실시간 모니터링</li>
+                <li>• 성공한 로그인만 기록</li>
+                <li>• 접속 시간 및 사용자 정보</li>
+                <li>• 관리자/사용자 구분</li>
+                <li>• 세션 ID로 추적 가능</li>
               </ul>
             </div>
             <div>
-              <h4 className="font-medium mb-2">로그 보관 정책</h4>
+              <h4 className="font-medium mb-2">데이터 관리</h4>
               <ul className="text-sm text-muted-foreground space-y-1">
-                <li>• 최대 보관 건수: 1,000건</li>
-                <li>• 자동 정리: 오래된 로그 삭제</li>
+                <li>• 최대 보관 건수: 500건</li>
+                <li>• 자동 정리: 오래된 기록 삭제</li>
                 <li>• 로컬 저장소 사용</li>
                 <li>• JSON 형식 내보내기 가능</li>
               </ul>
