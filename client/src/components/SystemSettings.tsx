@@ -1,8 +1,9 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Settings, Image, Mail, Users, Shield } from "lucide-react";
+import { Settings, Image, Mail, Users, Shield, Activity } from "lucide-react";
 import LogoUpload from "./LogoUpload";
 import PasswordManagement from "./PasswordManagement";
+import SecurityLogs from "./SecurityLogs";
 
 export default function SystemSettings() {
   return (
@@ -13,7 +14,7 @@ export default function SystemSettings() {
       </div>
 
       <Tabs defaultValue="logo" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-5">
+        <TabsList className="grid w-full grid-cols-6">
           <TabsTrigger value="logo" className="flex items-center gap-2">
             <Image className="h-4 w-4" />
             로고 설정
@@ -21,6 +22,10 @@ export default function SystemSettings() {
           <TabsTrigger value="password" className="flex items-center gap-2">
             <Shield className="h-4 w-4" />
             비밀번호
+          </TabsTrigger>
+          <TabsTrigger value="security" className="flex items-center gap-2">
+            <Activity className="h-4 w-4" />
+            보안 로그
           </TabsTrigger>
           <TabsTrigger value="email" className="flex items-center gap-2">
             <Mail className="h-4 w-4" />
@@ -42,6 +47,10 @@ export default function SystemSettings() {
         
         <TabsContent value="password" className="space-y-6">
           <PasswordManagement />
+        </TabsContent>
+        
+        <TabsContent value="security" className="space-y-6">
+          <SecurityLogs />
         </TabsContent>
         
         <TabsContent value="email" className="space-y-6">
