@@ -28,16 +28,16 @@ interface RentalListProps {
 }
 
 export default function RentalList({ rentals, showAllUsers = false, onUpdateStatus }: RentalListProps) {
-  const [filterStatus, setFilterStatus] = useState<string>("");
-  const [filterCategory, setFilterCategory] = useState<string>("");
+  const [filterStatus, setFilterStatus] = useState<string>("all");
+  const [filterCategory, setFilterCategory] = useState<string>("all");
   const [selectedRental, setSelectedRental] = useState<Rental | null>(null);
 
   const statuses = ["신청중", "승인", "대여중", "반납완료", "거절"];
   const categories = Array.from(new Set(rentals.map(rental => rental.category)));
 
   const filteredRentals = rentals.filter(rental => {
-    const matchesStatus = !filterStatus || rental.status === filterStatus;
-    const matchesCategory = !filterCategory || rental.category === filterCategory;
+    const matchesStatus = filterStatus === "all" || rental.status === filterStatus;
+    const matchesCategory = filterCategory === "all" || rental.category === filterCategory;
     return matchesStatus && matchesCategory;
   });
 
@@ -96,7 +96,7 @@ export default function RentalList({ rentals, showAllUsers = false, onUpdateStat
                 <SelectValue placeholder="전체 상태" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">전체 상태</SelectItem>
+                <SelectItem value="all">전체 상태</SelectItem>
                 {statuses.map((status) => (
                   <SelectItem key={status} value={status}>{status}</SelectItem>
                 ))}
@@ -108,7 +108,7 @@ export default function RentalList({ rentals, showAllUsers = false, onUpdateStat
                 <SelectValue placeholder="전체 카테고리" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">전체 카테고리</SelectItem>
+                <SelectItem value="all">전체 카테고리</SelectItem>
                 {categories.map((category) => (
                   <SelectItem key={category} value={category}>{category}</SelectItem>
                 ))}
