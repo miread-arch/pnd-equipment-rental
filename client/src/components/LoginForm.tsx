@@ -4,7 +4,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Building2, User } from "lucide-react";
+import { User } from "lucide-react";
+import PNDLogo from "./PNDLogo";
 
 interface LoginFormProps {
   onLogin: (daouId: string, name: string, department: string) => void;
@@ -27,11 +28,9 @@ export default function LoginForm({ onLogin }: LoginFormProps) {
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
           <div className="flex justify-center mb-4">
-            <div className="p-3 bg-primary/10 rounded-lg">
-              <Building2 className="h-8 w-8 text-primary" />
-            </div>
+            <PNDLogo size={60} />
           </div>
-          <CardTitle className="text-2xl">P&D Inc</CardTitle>
+          <CardTitle className="text-2xl">(주)피앤디아이앤씨</CardTitle>
           <CardDescription>IT Equipment Rental Management System</CardDescription>
         </CardHeader>
         <CardContent>
@@ -74,7 +73,10 @@ export default function LoginForm({ onLogin }: LoginFormProps) {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="상품운용팀">상품운용팀</SelectItem>
-                  <SelectItem value="기술본부">기술본부</SelectItem>
+                  <SelectItem value="전략사업본부">전략사업본부</SelectItem>
+                  <SelectItem value="기술1팀">기술1팀</SelectItem>
+                  <SelectItem value="기술2팀">기술2팀</SelectItem>
+                  <SelectItem value="기술3팀">기술3팀</SelectItem>
                 </SelectContent>
               </Select>
             </div>

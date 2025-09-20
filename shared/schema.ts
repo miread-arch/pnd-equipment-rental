@@ -9,7 +9,7 @@ export const statusEnum = pgEnum("status", ["대여가능", "대여불가"]);
 export const rentalStatusEnum = pgEnum("rental_status", ["신청중", "승인", "대여중", "반납완료", "거절"]);
 export const approvalStatusEnum = pgEnum("approval_status", ["승인", "거절", "대기"]);
 export const roleEnum = pgEnum("role", ["admin", "user"]);
-export const departmentEnum = pgEnum("department", ["상품운용팀", "기술본부"]);
+export const departmentEnum = pgEnum("department", ["상품운용팀", "전략사업본부", "기술1팀", "기술2팀", "기술3팀"]);
 
 // Users table
 export const users = pgTable("users", {

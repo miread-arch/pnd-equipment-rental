@@ -9,6 +9,7 @@ import Dashboard from "./Dashboard";
 import ItemManagement from "./ItemManagement";
 import RentalRequest from "./RentalRequest";
 import RentalList from "./RentalList";
+import SystemSettings from "./SystemSettings";
 
 interface User {
   daouId: string;
@@ -226,10 +227,7 @@ export default function AppLayout() {
                 
                 {user.role === "admin" && (
                   <Route path="/settings">
-                    <div className="space-y-6">
-                      <h2 className="text-2xl font-semibold">시스템 설정</h2>
-                      <p className="text-muted-foreground">시스템 설정 기능은 개발 중입니다.</p>
-                    </div>
+                    <SystemSettings />
                   </Route>
                 )}
                 
