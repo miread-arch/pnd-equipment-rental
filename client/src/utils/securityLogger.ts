@@ -30,12 +30,18 @@ export class SecurityLogger {
   private static async getClientIP(): Promise<string> {
     try {
       // In a real application, this would be handled by the backend
-      // For demo purposes, we'll use a simulated IP or try to get public IP
-      const response = await fetch('https://api.ipify.org?format=json');
-      const data = await response.json();
-      return data.ip || '127.0.0.1';
+      // For demo purposes, we'll generate a simulated IP based on session
+      const sessionIP = localStorage.getItem('demo_client_ip');
+      if (sessionIP) {
+        return sessionIP;
+      }
+      
+      // Generate a demo IP address for testing
+      const demoIP = `192.168.1.${Math.floor(Math.random() * 254) + 1}`;
+      localStorage.setItem('demo_client_ip', demoIP);
+      return demoIP;
     } catch (error) {
-      // Fallback to localhost if external service fails
+      // Fallback to localhost if all else fails
       return '127.0.0.1';
     }
   }
