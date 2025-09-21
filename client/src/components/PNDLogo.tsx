@@ -30,13 +30,18 @@ export default function PNDLogo({ size = 60, className = "" }: PNDLogoProps) {
     return (
       <div 
         className={`flex items-center justify-center ${className}`}
-        style={{ width: size, height: size }}
+        style={{ width: `${size}px`, height: `${size}px` }}
       >
         <img 
           src={logoUrl} 
           alt="Company Logo" 
-          className="w-full h-full object-contain"
-          style={{ maxWidth: size, maxHeight: size }}
+          className="object-contain"
+          style={{ 
+            width: `${size}px`, 
+            height: `${size}px`,
+            maxWidth: `${size}px`, 
+            maxHeight: `${size}px` 
+          }}
         />
       </div>
     );
@@ -47,16 +52,19 @@ export default function PNDLogo({ size = 60, className = "" }: PNDLogoProps) {
     <div 
       className={`flex items-center justify-center rounded-full ${className}`}
       style={{ 
-        width: size, 
-        height: size,
-        backgroundColor: '#3B82F6'
+        width: `${size}px`, 
+        height: `${size}px`,
+        backgroundColor: '#3B82F6',
+        minWidth: `${size}px`,
+        minHeight: `${size}px`,
+        flexShrink: 0
       }}
     >
       <span 
-        className="font-bold select-none"
+        className="font-bold select-none text-black"
         style={{ 
-          color: '#000000',
-          fontSize: size * 0.3 // Responsive font size based on logo size
+          fontSize: `${size * 0.3}px`, // Responsive font size based on logo size
+          lineHeight: '1'
         }}
       >
         PND

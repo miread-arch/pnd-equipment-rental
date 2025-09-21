@@ -79,11 +79,16 @@ export default function LoginForm({ onLogin }: LoginFormProps) {
     <div className="min-h-screen flex items-center justify-center bg-background p-4">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
-          <div className="flex justify-center mb-4">
-            <PNDLogo size={60} />
+          <div className="flex justify-center mb-6">
+            <div className="hidden sm:block">
+              <PNDLogo size={100} />
+            </div>
+            <div className="block sm:hidden">
+              <PNDLogo size={80} />
+            </div>
           </div>
-          <CardTitle className="text-2xl">(주)피앤디아이앤씨</CardTitle>
-          <CardDescription>IT Equipment Rental Management System</CardDescription>
+          <CardTitle className="text-2xl mb-2">(주)피앤디아이앤씨</CardTitle>
+          <CardDescription className="mb-6">IT Equipment Rental Management System</CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
