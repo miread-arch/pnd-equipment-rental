@@ -57,12 +57,16 @@
   font-size: 24px !important;
 }
 
-/* Header logo styling */
+/* Header logo styling - BALANCED SIZE */
 .header-logo {
-  height: 3rem !important;
-  width: auto !important;
+  height: 40px !important;
+  min-height: 40px !important;
   image-rendering: crisp-edges;
   image-rendering: -webkit-optimize-contrast;
+}
+
+.header-logo > * {
+  height: 100% !important;
 }
 
 /* Login logo styling */
