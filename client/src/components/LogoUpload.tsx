@@ -193,10 +193,6 @@ export default function LogoUpload() {
         <div className="p-4 bg-muted rounded-lg">
           <h4 className="font-medium mb-2">로고 가이드라인</h4>
           <ul className="text-sm text-muted-foreground space-y-1">
-            <li>• 헤더 로고: 텍스트 높이와 동일 (약 40-45px 높이)</li>
-            <li>• 로그인 페이지: 120×120px (큰 사이즈로 임팩트)</li>
-            <li>• 투명 배경 지원 (PNG, SVG)</li>
-            <li>• 간단하고 명확한 디자인 권장</li>
             <li>• 파일 크기: 5MB 이하</li>
             <li>• 고해상도 이미지 권장 (벡터 또는 300dpi 이상)</li>
           </ul>
