@@ -43,7 +43,7 @@ export default function RentalRequest({ availableItems, onSubmitRequest }: Renta
         itemId: selectedItem,
         itemName: item?.name,
         category: item?.category,
-        expectedReturnDate: expectedReturnDate.toISOString(),
+        expectedReturnDate: expectedReturnDate,
         note,
       });
       

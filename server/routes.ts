@@ -2,6 +2,7 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { insertItemSchema, insertRentalSchema, insertApprovalSchema } from "@shared/schema";
+import { sendEmail, emailTemplates } from "./email";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Items API
@@ -172,6 +173,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const rental = await storage.createRental(validation.data);
       
+      // Get user info for email notification
+      const user = await storage.getUserByDaouId(validation.data.userId);
+      
       // Create approval record based on item category
       if (item) {
         const requiresApproval = ["라우터", "스위치", "무선 제품군", "트랜시버"].includes(item.category);
@@ -185,6 +189,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
             approvalStatus: "대기",
             note: null
           });
+
+          // Send email notification to approver
+          if (user && process.env.SENDGRID_API_KEY) {
+            const template = emailTemplates.rentalRequest(
+              user.name, 
+              item.name, 
+              validation.data.expectedReturnDate
+            );
+            
+            // In a real app, get approver email from user management system
+            const approverEmail = item.category === "소모품류" 
+              ? "product-manager@company.com" 
+              : "tech-manager@company.com";
+            
+            await sendEmail({
+              to: approverEmail,
+              from: "noreply@company.com",
+              subject: template.subject,
+              text: template.text,
+              html: template.html
+            });
+          }
         }
       }
 
@@ -301,6 +327,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const rental = await storage.getRentalById(updatedApproval.rentalId);
         if (rental) {
           await storage.updateItem(rental.itemId, { status: "대여불가" });
+          
+          // Send approval email to user
+          const user = await storage.getUserByDaouId(rental.userId);
+          const item = await storage.getItemById(rental.itemId);
+          
+          if (user && item && process.env.SENDGRID_API_KEY) {
+            const template = emailTemplates.rentalApproved(
+              user.name,
+              item.name,
+              rental.expectedReturnDate
+            );
+            
+            await sendEmail({
+              to: user.email,
+              from: "noreply@company.com",
+              subject: template.subject,
+              text: template.text,
+              html: template.html
+            });
+          }
         }
       }
 
@@ -329,6 +375,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
       await storage.updateRental(updatedApproval.rentalId, {
         status: "거절"
       });
+
+      // Send rejection email to user
+      const rental = await storage.getRentalById(updatedApproval.rentalId);
+      if (rental) {
+        const user = await storage.getUserByDaouId(rental.userId);
+        const item = await storage.getItemById(rental.itemId);
+        
+        if (user && item && process.env.SENDGRID_API_KEY) {
+          const template = emailTemplates.rentalRejected(
+            user.name,
+            item.name,
+            note
+          );
+          
+          await sendEmail({
+            to: user.email,
+            from: "noreply@company.com",
+            subject: template.subject,
+            text: template.text,
+            html: template.html
+          });
+        }
+      }
 
       res.json(updatedApproval);
     } catch (error) {

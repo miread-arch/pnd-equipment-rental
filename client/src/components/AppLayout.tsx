@@ -1,8 +1,10 @@
 import { useState } from "react";
 import { Route, Switch, useLocation } from "wouter";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation } from "@tanstack/react-query";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { Toaster } from "@/components/ui/toaster";
+import { useToast } from "@/hooks/use-toast";
+import { apiRequest, queryClient } from "@/lib/queryClient";
 import LoginForm from "./LoginForm";
 import Header from "./Header";
 import AppSidebar from "./Sidebar";
@@ -11,7 +13,7 @@ import ItemManagement from "./ItemManagement";
 import RentalRequest from "./RentalRequest";
 import RentalList from "./RentalList";
 import SystemSettings from "./SystemSettings";
-import type { RentalWithDetails } from "@shared/schema";
+import type { RentalWithDetails, Item, InsertItem } from "@shared/schema";
 
 interface User {
   daouId: string;
@@ -24,44 +26,19 @@ export default function AppLayout() {
   const [user, setUser] = useState<User | null>(null);
   const [location] = useLocation();
 
-  // //todo: remove mock functionality
-  const [mockItems] = useState([
-    {
-      itemId: "1",
-      category: "Router",
-      name: "HUAWEI AR6120",
-      model: "AR6120-S",
-      serialNumber: "2210012345678",
-      status: "대여가능",
-      note: "신규 입고"
-    },
-    {
-      itemId: "2", 
-      category: "Switch",
-      name: "Cisco Catalyst 2960",
-      model: "WS-C2960-24TT-L",
-      serialNumber: "FOC1234567A",
-      status: "대여불가",
-      note: "점검 중"
-    },
-    {
-      itemId: "3",
-      category: "소모품",
-      name: "LC-LC 광점퍼코드",
-      model: "3M",
-      serialNumber: "",
-      status: "대여가능",
-      note: "재고 20개"
-    },
-    {
-      itemId: "4",
-      category: "Wireless",
-      name: "Cisco Aironet 2802I",
-      model: "AIR-AP2802I-K9",
-      serialNumber: "FCW1234567B",
-      status: "대여가능"
-    }
-  ]);
+  const { toast } = useToast();
+
+  // Fetch all items
+  const { data: allItems = [] } = useQuery<Item[]>({
+    queryKey: ["/api/items"],
+    enabled: !!user
+  });
+
+  // Fetch available items for rental request
+  const { data: availableItems = [] } = useQuery<Item[]>({
+    queryKey: ["/api/items/available"],
+    enabled: !!user
+  });
 
   // Fetch all rental data
   const { data: allRentals = [] } = useQuery<RentalWithDetails[]>({
@@ -84,30 +61,131 @@ export default function AppLayout() {
     setUser(null);
   };
 
-  const handleAddItem = (item: any) => {
-    console.log('Add item:', item);
+  // Item management mutations
+  const addItemMutation = useMutation({
+    mutationFn: async (item: Omit<InsertItem, 'createdBy'>) => {
+      const response = await apiRequest('POST', '/api/items', item);
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/items"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/items/available"] });
+      toast({ title: "물품이 성공적으로 등록되었습니다." });
+    },
+    onError: (error: any) => {
+      toast({ 
+        title: "물품 등록 실패", 
+        description: error.message || "물품 등록 중 오류가 발생했습니다.",
+        variant: "destructive" 
+      });
+    }
+  });
+
+  const updateItemMutation = useMutation({
+    mutationFn: async ({ itemId, updates }: { itemId: string; updates: Partial<Item> }) => {
+      const response = await apiRequest('PUT', `/api/items/${itemId}`, updates);
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/items"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/items/available"] });
+      toast({ title: "물품 정보가 성공적으로 수정되었습니다." });
+    },
+    onError: (error: any) => {
+      toast({ 
+        title: "물품 수정 실패", 
+        description: error.message || "물품 수정 중 오류가 발생했습니다.",
+        variant: "destructive" 
+      });
+    }
+  });
+
+  const deleteItemMutation = useMutation({
+    mutationFn: async (itemId: string) => {
+      await apiRequest('DELETE', `/api/items/${itemId}`);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/items"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/items/available"] });
+      toast({ title: "물품이 성공적으로 삭제되었습니다." });
+    },
+    onError: (error: any) => {
+      toast({ 
+        title: "물품 삭제 실패", 
+        description: error.message || "물품 삭제 중 오류가 발생했습니다.",
+        variant: "destructive" 
+      });
+    }
+  });
+
+  // Rental request mutation
+  const submitRentalMutation = useMutation({
+    mutationFn: async (request: { itemId: string; expectedReturnDate: Date; userId: string }) => {
+      const response = await apiRequest('POST', '/api/rentals', request);
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/rentals"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/rentals/user", user?.daouId] });
+      toast({ title: "대여 신청이 성공적으로 제출되었습니다." });
+    },
+    onError: (error: any) => {
+      toast({ 
+        title: "대여 신청 실패", 
+        description: error.message || "대여 신청 중 오류가 발생했습니다.",
+        variant: "destructive" 
+      });
+    }
+  });
+
+  // Rental status update mutation
+  const updateRentalStatusMutation = useMutation({
+    mutationFn: async ({ rentalId, status }: { rentalId: string; status: string }) => {
+      const response = await apiRequest('PUT', `/api/rentals/${rentalId}`, { status });
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/rentals"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/rentals/user", user?.daouId] });
+      toast({ title: "대여 상태가 성공적으로 업데이트되었습니다." });
+    },
+    onError: (error: any) => {
+      toast({ 
+        title: "상태 업데이트 실패", 
+        description: error.message || "상태 업데이트 중 오류가 발생했습니다.",
+        variant: "destructive" 
+      });
+    }
+  });
+
+  // Handler functions
+  const handleAddItem = (item: Partial<Item>) => {
+    addItemMutation.mutate(item as Omit<InsertItem, 'createdBy'>);
   };
 
-  const handleUpdateItem = (itemId: string, updates: any) => {
-    console.log('Update item:', itemId, updates);
+  const handleUpdateItem = (itemId: string, updates: Partial<Item>) => {
+    updateItemMutation.mutate({ itemId, updates });
   };
 
   const handleDeleteItem = (itemId: string) => {
-    console.log('Delete item:', itemId);
+    deleteItemMutation.mutate(itemId);
   };
 
-  const handleSubmitRequest = (request: any) => {
-    console.log('Rental request submitted:', request);
+  const handleSubmitRequest = (request: { itemId: string; expectedReturnDate: Date }) => {
+    if (!user?.daouId) {
+      toast({ title: "로그인이 필요합니다.", variant: "destructive" });
+      return;
+    }
+    submitRentalMutation.mutate({ ...request, userId: user.daouId });
   };
 
   const handleUpdateRentalStatus = (rentalId: string, status: string) => {
-    console.log('Update rental status:', rentalId, status);
+    updateRentalStatusMutation.mutate({ rentalId, status });
   };
 
-  const availableItems = mockItems.filter(item => item.status === "대여가능");
 
   const dashboardStats = {
-    totalItems: mockItems.length,
+    totalItems: allItems.length,
     availableItems: availableItems.length,
     myActiveRentals: userRentals.filter(r => ["승인", "대여중"].includes(r.status)).length,
     pendingApprovals: allRentals.filter(r => r.status === "신청중").length,
@@ -163,7 +241,7 @@ export default function AppLayout() {
                 {user.role === "admin" && (
                   <Route path="/items">
                     <ItemManagement 
-                      items={mockItems}
+                      items={allItems}
                       onAddItem={handleAddItem}
                       onUpdateItem={handleUpdateItem}
                       onDeleteItem={handleDeleteItem}

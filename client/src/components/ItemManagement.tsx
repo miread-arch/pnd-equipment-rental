@@ -30,7 +30,7 @@ interface ItemManagementProps {
 export default function ItemManagement({ items, onAddItem, onUpdateItem, onDeleteItem }: ItemManagementProps) {
   const [showAddDialog, setShowAddDialog] = useState(false);
   const [editingItem, setEditingItem] = useState<Item | null>(null);
-  const [filterCategory, setFilterCategory] = useState<string>("");
+  const [filterCategory, setFilterCategory] = useState<string>("all");
   const [searchTerm, setSearchTerm] = useState("");
   
   const [formData, setFormData] = useState({
@@ -46,7 +46,7 @@ export default function ItemManagement({ items, onAddItem, onUpdateItem, onDelet
   const statuses = ["대여가능", "대여불가"].filter(s => s && s.trim() !== '');
 
   const filteredItems = items.filter(item => {
-    const matchesCategory = !filterCategory || item.category === filterCategory;
+    const matchesCategory = !filterCategory || filterCategory === "all" || item.category === filterCategory;
     const matchesSearch = !searchTerm || 
       item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       item.model?.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -235,7 +235,7 @@ export default function ItemManagement({ items, onAddItem, onUpdateItem, onDelet
                 <SelectValue placeholder="전체 카테고리" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">전체 카테고리</SelectItem>
+                <SelectItem value="all">전체 카테고리</SelectItem>
                 {categories.map((cat) => (
                   <SelectItem key={cat} value={cat}>{cat}</SelectItem>
                 ))}
