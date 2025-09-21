@@ -30,7 +30,7 @@ export default function RentalRequest({ availableItems, onSubmitRequest }: Renta
   const [expectedReturnDate, setExpectedReturnDate] = useState<Date>();
   const [note, setNote] = useState("");
 
-  const categories = ["Router", "Switch", "Wireless", "트랜시버", "소모품"];
+  const categories = ["라우터", "스위치", "무선 제품군", "트랜시버", "소모품류"];
   const filteredItems = availableItems.filter(item => 
     !selectedCategory || item.category === selectedCategory
   );
