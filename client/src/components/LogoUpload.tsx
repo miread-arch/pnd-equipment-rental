@@ -190,13 +190,6 @@ export default function LogoUpload() {
           </div>
         </div>
         
-        <div className="p-4 bg-muted rounded-lg">
-          <h4 className="font-medium mb-2">로고 가이드라인</h4>
-          <ul className="text-sm text-muted-foreground space-y-1">
-            <li>• 파일 크기: 5MB 이하</li>
-            <li>• 고해상도 이미지 권장 (벡터 또는 300dpi 이상)</li>
-          </ul>
-        </div>
       </CardContent>
     </Card>
   );
