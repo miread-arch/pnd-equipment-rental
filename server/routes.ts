@@ -191,7 +191,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           });
 
           // Send email notification to approver
-          if (user && process.env.SENDGRID_API_KEY) {
+          if (user) {
             const template = emailTemplates.rentalRequest(
               user.name, 
               item.name, 
@@ -332,7 +332,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           const user = await storage.getUserByDaouId(rental.userId);
           const item = await storage.getItemById(rental.itemId);
           
-          if (user && item && process.env.SENDGRID_API_KEY) {
+          if (user && item) {
             const template = emailTemplates.rentalApproved(
               user.name,
               item.name,
@@ -382,7 +382,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const user = await storage.getUserByDaouId(rental.userId);
         const item = await storage.getItemById(rental.itemId);
         
-        if (user && item && process.env.SENDGRID_API_KEY) {
+        if (user && item) {
           const template = emailTemplates.rentalRejected(
             user.name,
             item.name,
@@ -461,7 +461,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Currently using basic validation for development phase
   function requireAdmin(req: any, res: any, next: any) {
     // In production, implement proper JWT/session validation
-    // For now, this is a placeholder for Phase 1 development
+    // For Phase 1 development, use simple header validation
+    const adminKey = req.headers['x-admin-key'];
+    const expectedKey = process.env.ADMIN_KEY || 'dev-admin-key';
+    
+    if (adminKey !== expectedKey) {
+      return res.status(403).json({ error: 'Admin access required' });
+    }
+    
     next();
   }
 

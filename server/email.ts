@@ -4,11 +4,14 @@ import { writeFileSync, existsSync, mkdirSync } from 'fs';
 import { join } from 'path';
 
 // Email configuration from environment variables
+const smtpPort = parseInt(process.env.SMTP_PORT || '465');
+const smtpSecure = process.env.SMTP_SECURE ? process.env.SMTP_SECURE === 'true' : smtpPort === 465;
+
 const EMAIL_CONFIG = {
   enabled: process.env.EMAIL_ENABLED === 'true',
   host: process.env.SMTP_HOST || 'outbound.daouoffice.com',
-  port: parseInt(process.env.SMTP_PORT || '465'),
-  secure: process.env.SMTP_SECURE ? process.env.SMTP_SECURE === 'true' : EMAIL_CONFIG.port === 465, // true for 465, false for other ports
+  port: smtpPort,
+  secure: smtpSecure, // true for 465, false for other ports
   auth: {
     user: process.env.SMTP_USER || 'noreply@pndinc.co.kr',
     pass: process.env.SMTP_PASSWORD || ''
@@ -63,7 +66,7 @@ function createTransporter() {
   return nodemailer.createTransport({
     host: EMAIL_CONFIG.host,
     port: EMAIL_CONFIG.port,
-    secure: EMAIL_CONFIG.port === 465, // Use SSL for port 465, STARTTLS for 587
+    secure: smtpSecure, // Use computed secure setting to honor SMTP_SECURE overrides
     auth: EMAIL_CONFIG.auth,
     // Only disable certificate validation in development
     ...(process.env.NODE_ENV === 'development' && {
