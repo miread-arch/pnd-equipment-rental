@@ -52,17 +52,17 @@
 }
 
 .force-header-text.force-header-text.force-header-text {
-  height: 6rem !important;
-  line-height: 6rem !important;
-  font-size: 48px !important;
+  height: 40px !important;
+  line-height: 40px !important;
+  font-size: 24px !important;
 }
 
-/* Header logo styling - LARGE SIZE */
+/* Header logo styling - TEXT MATCHED SIZE */
 .header-logo {
-  height: 8rem !important;
-  min-height: 8rem !important;
-  width: 8rem !important;
-  min-width: 8rem !important;
+  height: 40px !important;
+  min-height: 40px !important;
+  width: 40px !important;
+  min-width: 40px !important;
   image-rendering: crisp-edges;
   image-rendering: -webkit-optimize-contrast;
 }
