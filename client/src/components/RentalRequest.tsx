@@ -235,8 +235,7 @@ export default function RentalRequest({ availableItems, onSubmitRequest }: Renta
                   <div>
                     <p className="font-medium">관리자 승인</p>
                     <p className="text-sm text-muted-foreground">
-                      Router/Switch/Wireless/트랜시버: 시리얼넘버 필수, 관리 담당자 승인<br/>
-                      소모품: 시리얼넘버 불필요, 상품운용팀 승인
+                      일반 장비: 관리 담당자 승인 필요, 소모품: 상품운용팀 승인 필요
                     </p>
                   </div>
                 </div>
