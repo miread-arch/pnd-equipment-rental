@@ -30,7 +30,7 @@ export default function RentalRequest({ availableItems, onSubmitRequest }: Renta
   const [expectedReturnDate, setExpectedReturnDate] = useState<Date>();
   const [note, setNote] = useState("");
 
-  const categories = Array.from(new Set(availableItems.map(item => item.category).filter(cat => cat && cat.trim() !== '')));
+  const categories = ["Router", "Switch", "Wireless", "트랜시버", "소모품"];
   const filteredItems = availableItems.filter(item => 
     !selectedCategory || item.category === selectedCategory
   );
@@ -86,7 +86,7 @@ export default function RentalRequest({ availableItems, onSubmitRequest }: Renta
                     <SelectValue placeholder="카테고리 선택" />
                   </SelectTrigger>
                   <SelectContent>
-                    {categories.filter(category => category && category.trim() !== '').map((category) => (
+                    {categories.map((category) => (
                       <SelectItem key={category} value={category}>
                         {category}
                       </SelectItem>
@@ -235,8 +235,8 @@ export default function RentalRequest({ availableItems, onSubmitRequest }: Renta
                   <div>
                     <p className="font-medium">관리자 승인</p>
                     <p className="text-sm text-muted-foreground">
-                      일반 장비: 관리자 1명 승인<br/>
-                      소모품: 관리자 2명 승인 필요
+                      Router/Switch/Wireless/트랜시버: 시리얼넘버 필수, 관리 담당자 승인<br/>
+                      소모품: 시리얼넘버 불필요, 상품운용팀 승인
                     </p>
                   </div>
                 </div>
