@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Route, Switch, useLocation } from "wouter";
+import { useQuery } from "@tanstack/react-query";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { Toaster } from "@/components/ui/toaster";
 import LoginForm from "./LoginForm";
@@ -10,6 +11,7 @@ import ItemManagement from "./ItemManagement";
 import RentalRequest from "./RentalRequest";
 import RentalList from "./RentalList";
 import SystemSettings from "./SystemSettings";
+import type { RentalWithDetails } from "@shared/schema";
 
 interface User {
   daouId: string;
@@ -61,53 +63,17 @@ export default function AppLayout() {
     }
   ]);
 
-  const [mockRentals] = useState([
-    {
-      rentalId: "1",
-      itemName: "HUAWEI AR6120",
-      category: "Router",
-      userName: "김철수",
-      department: "기술본부",
-      status: "대여중",
-      createdAt: new Date(2024, 0, 15),
-      expectedReturnDate: new Date(2024, 0, 25),
-      note: "프로젝트 테스트용"
-    },
-    {
-      rentalId: "2", 
-      itemName: "LC-LC 광점퍼코드",
-      category: "소모품",
-      userName: "이영희",
-      department: "상품운용팀",
-      status: "신청중",
-      createdAt: new Date(2024, 0, 20),
-      expectedReturnDate: new Date(2024, 0, 30),
-      note: "고객사 설치용"
-    },
-    {
-      rentalId: "3",
-      itemName: "Cisco Catalyst 2960", 
-      category: "Switch",
-      userName: "박민수",
-      department: "기술본부",
-      status: "반납완료",
-      createdAt: new Date(2024, 0, 10),
-      expectedReturnDate: new Date(2024, 0, 20),
-      actualReturnDate: new Date(2024, 0, 19),
-      note: "네트워크 구성 테스트"
-    },
-    {
-      rentalId: "4",
-      itemName: "Cisco Aironet 2802I",
-      category: "Wireless", 
-      userName: "정수진",
-      department: "기술본부",
-      status: "대여중",
-      createdAt: new Date(2024, 0, 5),
-      expectedReturnDate: new Date(2024, 0, 15), // Overdue
-      note: "무선 환경 테스트"
-    }
-  ]);
+  // Fetch all rental data
+  const { data: allRentals = [] } = useQuery<RentalWithDetails[]>({
+    queryKey: ["/api/rentals"],
+    enabled: !!user
+  });
+
+  // Fetch user-specific rental data
+  const { data: userRentals = [] } = useQuery<RentalWithDetails[]>({
+    queryKey: ["/api/rentals/user", user?.daouId],
+    enabled: !!user?.daouId
+  });
 
   const handleLogin = (daouId: string, name: string, department: string) => {
     const role = department === "상품운용팀" ? "admin" : "user";
@@ -139,14 +105,13 @@ export default function AppLayout() {
   };
 
   const availableItems = mockItems.filter(item => item.status === "대여가능");
-  const userRentals = user ? mockRentals.filter(rental => rental.userName === user.name) : [];
 
   const dashboardStats = {
     totalItems: mockItems.length,
     availableItems: availableItems.length,
     myActiveRentals: userRentals.filter(r => ["승인", "대여중"].includes(r.status)).length,
-    pendingApprovals: mockRentals.filter(r => r.status === "신청중").length,
-    overdueRentals: mockRentals.filter(r => 
+    pendingApprovals: allRentals.filter(r => r.status === "신청중").length,
+    overdueRentals: allRentals.filter(r => 
       r.status === "대여중" && new Date() > r.expectedReturnDate
     ).length,
   };
@@ -189,7 +154,7 @@ export default function AppLayout() {
                 
                 <Route path="/all-rentals">
                   <RentalList 
-                    rentals={mockRentals}
+                    rentals={allRentals}
                     showAllUsers={true}
                     onUpdateStatus={user.role === "admin" ? handleUpdateRentalStatus : undefined}
                   />
@@ -209,7 +174,7 @@ export default function AppLayout() {
                 {user.role === "admin" && (
                   <Route path="/approvals">
                     <RentalList 
-                      rentals={mockRentals.filter(r => r.status === "신청중")}
+                      rentals={allRentals.filter(r => r.status === "신청중")}
                       showAllUsers={true}
                       onUpdateStatus={handleUpdateRentalStatus}
                     />
