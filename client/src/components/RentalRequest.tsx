@@ -222,26 +222,27 @@ export default function RentalRequest({ availableItems, onSubmitRequest }: Renta
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-3">
-                <div className="flex items-center gap-3">
-                  <div className="w-6 h-6 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-xs font-medium">1</div>
+                <div className="flex items-start gap-3">
+                  <div className="w-6 h-6 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-xs font-medium flex-shrink-0">1</div>
                   <div>
                     <p className="font-medium">대여 신청</p>
                     <p className="text-sm text-muted-foreground">원하는 장비와 기간을 선택하여 신청</p>
                   </div>
                 </div>
                 
-                <div className="flex items-center gap-3">
-                  <div className="w-6 h-6 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-xs font-medium">2</div>
+                <div className="flex items-start gap-3">
+                  <div className="w-6 h-6 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-xs font-medium flex-shrink-0">2</div>
                   <div>
                     <p className="font-medium">관리자 승인</p>
                     <p className="text-sm text-muted-foreground">
-                      일반 장비: 관리 담당자 승인 필요, 소모품: 상품운용팀 승인 필요
+                      일반 장비: 관리 담당자 승인 필요<br/>
+                      소모품: 상품운용팀 승인 필요
                     </p>
                   </div>
                 </div>
                 
-                <div className="flex items-center gap-3">
-                  <div className="w-6 h-6 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-xs font-medium">3</div>
+                <div className="flex items-start gap-3">
+                  <div className="w-6 h-6 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-xs font-medium flex-shrink-0">3</div>
                   <div>
                     <p className="font-medium">대여 완료</p>
                     <p className="text-sm text-muted-foreground">승인 후 장비 수령 및 사용</p>
