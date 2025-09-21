@@ -132,11 +132,11 @@ export default function Dashboard({ stats, userRole }: DashboardProps) {
             {/* //todo: remove mock functionality */}
             <div className="space-y-3">
               {[
-                { category: "Router", total: 15, available: 8 },
-                { category: "Switch", total: 22, available: 12 },
-                { category: "Wireless", total: 18, available: 9 },
+                { category: "라우터", total: 15, available: 8 },
+                { category: "스위치", total: 22, available: 12 },
+                { category: "무선 제품군", total: 18, available: 9 },
                 { category: "트랜시버", total: 35, available: 20 },
-                { category: "소모품", total: 45, available: 30 },
+                { category: "소모품류", total: 45, available: 30 },
               ].map((cat, index) => (
                 <div key={index} className="flex items-center justify-between">
                   <span className="font-medium">{cat.category}</span>
