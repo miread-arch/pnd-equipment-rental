@@ -8,7 +8,7 @@ const EMAIL_CONFIG = {
   enabled: process.env.EMAIL_ENABLED === 'true',
   host: process.env.SMTP_HOST || 'outbound.daouoffice.com',
   port: parseInt(process.env.SMTP_PORT || '465'),
-  secure: process.env.SMTP_SECURE === 'true' || true, // true for 465, false for other ports
+  secure: process.env.SMTP_SECURE ? process.env.SMTP_SECURE === 'true' : EMAIL_CONFIG.port === 465, // true for 465, false for other ports
   auth: {
     user: process.env.SMTP_USER || 'noreply@pndinc.co.kr',
     pass: process.env.SMTP_PASSWORD || ''
@@ -60,14 +60,17 @@ function createTransporter() {
     return null;
   }
 
-  return nodemailer.createTransporter({
+  return nodemailer.createTransport({
     host: EMAIL_CONFIG.host,
     port: EMAIL_CONFIG.port,
-    secure: EMAIL_CONFIG.secure,
+    secure: EMAIL_CONFIG.port === 465, // Use SSL for port 465, STARTTLS for 587
     auth: EMAIL_CONFIG.auth,
-    tls: {
-      rejectUnauthorized: false // For development/testing
-    }
+    // Only disable certificate validation in development
+    ...(process.env.NODE_ENV === 'development' && {
+      tls: {
+        rejectUnauthorized: false,
+      },
+    }),
   });
 }
 
@@ -125,6 +128,13 @@ export async function sendEmail(params: EmailParams): Promise<boolean> {
 export function getEmailLogs(date?: string): EmailLog[] {
   try {
     const targetDate = date || new Date().toISOString().split('T')[0];
+    
+    // Validate date format (YYYY-MM-DD) to prevent path traversal
+    const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
+    if (!dateRegex.test(targetDate)) {
+      throw new Error('Invalid date format. Expected YYYY-MM-DD');
+    }
+    
     const logFile = join(logsDir, `emails_${targetDate}.json`);
     
     if (!existsSync(logFile)) {
@@ -161,7 +171,7 @@ P&D I&C IT 장비 관리 시스템
     html: `
       <div style="font-family: 맑은고딕, Arial, sans-serif; max-width: 600px; margin: 0 auto;">
         <div style="background-color: #f8f9fa; padding: 20px; border-radius: 8px;">
-          <h2 style="color: #2c3e50; margin-top: 0;">🔔 대여 신청 승인 요청</h2>
+          <h2 style="color: #2c3e50; margin-top: 0;">대여 신청 승인 요청</h2>
           <p style="font-size: 16px; margin-bottom: 20px;"><strong>${userName}</strong>님이 새로운 대여 신청을 했습니다.</p>
           
           <div style="background-color: white; padding: 20px; border-radius: 5px; margin: 20px 0;">
@@ -208,7 +218,7 @@ P&D I&C IT 장비 관리 시스템
     html: `
       <div style="font-family: 맑은고딕, Arial, sans-serif; max-width: 600px; margin: 0 auto;">
         <div style="background-color: #f8f9fa; padding: 20px; border-radius: 8px;">
-          <h2 style="color: #27ae60; margin-top: 0;">✅ 대여 승인 완료</h2>
+          <h2 style="color: #27ae60; margin-top: 0;">대여 승인 완료</h2>
           <p style="font-size: 16px; margin-bottom: 20px;"><strong>${userName}</strong>님, 대여 신청이 승인되었습니다.</p>
           
           <div style="background-color: white; padding: 20px; border-radius: 5px; margin: 20px 0;">
@@ -226,7 +236,7 @@ P&D I&C IT 장비 관리 시스템
           
           <div style="background-color: #fff3cd; padding: 15px; border-radius: 5px; border-left: 4px solid #ffc107;">
             <p style="margin: 0; color: #856404;">
-              <strong>📋 안내사항</strong><br>
+              <strong>안내사항</strong><br>
               • 물품 수령 후 안전하게 사용해주세요<br>
               • 반납예정일을 꼭 지켜주세요<br>
               • 문제 발생 시 즉시 관리자에게 연락해주세요
@@ -258,7 +268,7 @@ P&D I&C IT 장비 관리 시스템
     html: `
       <div style="font-family: 맑은고딕, Arial, sans-serif; max-width: 600px; margin: 0 auto;">
         <div style="background-color: #f8f9fa; padding: 20px; border-radius: 8px;">
-          <h2 style="color: #e74c3c; margin-top: 0;">❌ 대여 신청 반려</h2>
+          <h2 style="color: #e74c3c; margin-top: 0;">대여 신청 반려</h2>
           <p style="font-size: 16px; margin-bottom: 20px;"><strong>${userName}</strong>님, 대여 신청이 반려되었습니다.</p>
           
           <div style="background-color: white; padding: 20px; border-radius: 5px; margin: 20px 0;">
@@ -306,7 +316,7 @@ P&D I&C IT 장비 관리 시스템
     html: `
       <div style="font-family: 맑은고딕, Arial, sans-serif; max-width: 600px; margin: 0 auto;">
         <div style="background-color: #f8f9fa; padding: 20px; border-radius: 8px;">
-          <h2 style="color: #f39c12; margin-top: 0;">⏰ 반납 예정 알림</h2>
+          <h2 style="color: #f39c12; margin-top: 0;">반납 예정 알림</h2>
           <p style="font-size: 16px; margin-bottom: 20px;"><strong>${userName}</strong>님, 대여물품의 반납예정일이 다가오고 있습니다.</p>
           
           <div style="background-color: white; padding: 20px; border-radius: 5px; margin: 20px 0;">
@@ -328,7 +338,7 @@ P&D I&C IT 장비 관리 시스템
           
           <div style="background-color: #fff3cd; padding: 15px; border-radius: 5px; border-left: 4px solid #ffc107;">
             <p style="margin: 0; color: #856404;">
-              <strong>📋 반납 안내</strong><br>
+              <strong>반납 안내</strong><br>
               반납예정일에 맞춰 물품을 반납해주세요.
             </p>
           </div>
@@ -359,7 +369,7 @@ P&D I&C IT 장비 관리 시스템
     html: `
       <div style="font-family: 맑은고딕, Arial, sans-serif; max-width: 600px; margin: 0 auto;">
         <div style="background-color: #f8f9fa; padding: 20px; border-radius: 8px;">
-          <h2 style="color: #e74c3c; margin-top: 0;">🚨 반납 연체 알림</h2>
+          <h2 style="color: #e74c3c; margin-top: 0;">반납 연체 알림</h2>
           <p style="font-size: 16px; margin-bottom: 20px;"><strong>${userName}</strong>님, 대여물품 반납이 연체되었습니다.</p>
           
           <div style="background-color: white; padding: 20px; border-radius: 5px; margin: 20px 0;">
@@ -381,7 +391,7 @@ P&D I&C IT 장비 관리 시스템
           
           <div style="background-color: #f8d7da; padding: 15px; border-radius: 5px; border-left: 4px solid #dc3545;">
             <p style="margin: 0; color: #721c24;">
-              <strong>⚠️ 긴급</strong><br>
+              <strong>긴급</strong><br>
               즉시 물품을 반납해주시기 바랍니다.
             </p>
           </div>

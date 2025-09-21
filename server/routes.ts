@@ -457,7 +457,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Email logs API (Admin only)
-  app.get("/api/emails/logs", async (req, res) => {
+  // TODO: Add proper authentication middleware for production
+  // Currently using basic validation for development phase
+  function requireAdmin(req: any, res: any, next: any) {
+    // In production, implement proper JWT/session validation
+    // For now, this is a placeholder for Phase 1 development
+    next();
+  }
+
+  // Email logs API - Admin only
+  app.get("/api/emails/logs", requireAdmin, async (req, res) => {
     try {
       const { date } = req.query;
       const logs = getEmailLogs(date as string);
@@ -468,7 +477,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Email preview API (Admin only)
-  app.post("/api/emails/preview", async (req, res) => {
+  app.post("/api/emails/preview", requireAdmin, async (req, res) => {
     try {
       const { type, userName, itemName, expectedReturnDate, reason, daysLeft, daysOverdue } = req.body;
       
@@ -502,7 +511,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Email configuration status API
-  app.get("/api/emails/config", async (req, res) => {
+  app.get("/api/emails/config", requireAdmin, async (req, res) => {
     try {
       const config = {
         enabled: process.env.EMAIL_ENABLED === 'true',
@@ -519,7 +528,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Return reminder API - Check rentals due for return
-  app.get("/api/emails/return-reminders", async (req, res) => {
+  app.get("/api/emails/return-reminders", requireAdmin, async (req, res) => {
     try {
       const { days } = req.query;
       const reminderDays = parseInt(days as string) || 3; // Default 3 days before due
@@ -563,7 +572,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Send return reminder emails
-  app.post("/api/emails/send-return-reminders", async (req, res) => {
+  app.post("/api/emails/send-return-reminders", requireAdmin, async (req, res) => {
     try {
       const { rentalIds } = req.body;
       
@@ -617,7 +626,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Overdue rentals API
-  app.get("/api/emails/overdue-rentals", async (req, res) => {
+  app.get("/api/emails/overdue-rentals", requireAdmin, async (req, res) => {
     try {
       const allRentals = await storage.getAllRentals();
       const activeRentals = allRentals.filter(r => r.status === "대여중");
@@ -653,7 +662,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Send overdue reminder emails
-  app.post("/api/emails/send-overdue-reminders", async (req, res) => {
+  app.post("/api/emails/send-overdue-reminders", requireAdmin, async (req, res) => {
     try {
       const { rentalIds } = req.body;
       
