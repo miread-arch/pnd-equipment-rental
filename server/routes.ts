@@ -369,7 +369,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const allItems = await storage.getAllItems();
       const availableItems = await storage.getAvailableItems();
       
-      const categories = ["Router", "Switch", "Wireless", "트랜시버", "소모품"];
+      const categories = ["라우터", "스위치", "무선 제품군", "트랜시버", "소모품류"];
       const categoryStats = categories.map(category => {
         const totalInCategory = allItems.filter(item => item.category === category).length;
         const availableInCategory = availableItems.filter(item => item.category === category).length;
