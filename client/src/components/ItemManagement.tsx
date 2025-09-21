@@ -34,7 +34,7 @@ export default function ItemManagement({ items, onAddItem, onUpdateItem, onDelet
   const [searchTerm, setSearchTerm] = useState("");
   
   const [formData, setFormData] = useState({
-    category: "",
+    category: undefined as string | undefined,
     name: "",
     model: "",
     serialNumber: "",
@@ -42,8 +42,8 @@ export default function ItemManagement({ items, onAddItem, onUpdateItem, onDelet
     note: "",
   });
 
-  const categories = ["Router", "Switch", "Wireless", "트랜시버", "소모품"];
-  const statuses = ["대여가능", "대여불가"];
+  const categories = ["Router", "Switch", "Wireless", "트랜시버", "소모품"].filter(c => c && c.trim() !== '');
+  const statuses = ["대여가능", "대여불가"].filter(s => s && s.trim() !== '');
 
   const filteredItems = items.filter(item => {
     const matchesCategory = !filterCategory || item.category === filterCategory;
@@ -68,7 +68,7 @@ export default function ItemManagement({ items, onAddItem, onUpdateItem, onDelet
 
   const resetForm = () => {
     setFormData({
-      category: "",
+      category: undefined as string | undefined,
       name: "",
       model: "",
       serialNumber: "",
@@ -115,7 +115,7 @@ export default function ItemManagement({ items, onAddItem, onUpdateItem, onDelet
                 <div className="space-y-2">
                   <Label htmlFor="category">카테고리 *</Label>
                   <Select 
-                    value={formData.category} 
+                    value={formData.category || ""} 
                     onValueChange={(value) => setFormData({...formData, category: value})}
                     required
                   >
@@ -123,7 +123,7 @@ export default function ItemManagement({ items, onAddItem, onUpdateItem, onDelet
                       <SelectValue placeholder="카테고리 선택" />
                     </SelectTrigger>
                     <SelectContent>
-                      {categories.map((cat) => (
+                      {categories.filter(cat => cat && cat.trim() !== '').map((cat) => (
                         <SelectItem key={cat} value={cat}>{cat}</SelectItem>
                       ))}
                     </SelectContent>
@@ -180,7 +180,7 @@ export default function ItemManagement({ items, onAddItem, onUpdateItem, onDelet
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      {statuses.map((status) => (
+                      {statuses.filter(status => status && status.trim() !== '').map((status) => (
                         <SelectItem key={status} value={status}>{status}</SelectItem>
                       ))}
                     </SelectContent>

@@ -22,13 +22,13 @@ export default function Header({ user, onLogout }: HeaderProps) {
       <div className="flex items-center gap-4">
         <SidebarTrigger data-testid="button-sidebar-toggle" />
         <div className="flex items-center gap-4">
-          <div className="hidden sm:block">
-            <PNDLogo size={45} />
+          <div className="hidden sm:block force-logo-40" style={{ flexShrink: 0 }}>
+            <PNDLogo size={40} />
           </div>
-          <div className="block sm:hidden">
-            <PNDLogo size={36} />
+          <div className="block sm:hidden force-logo-32" style={{ flexShrink: 0 }}>
+            <PNDLogo size={32} />
           </div>
-          <h1 className="text-lg font-medium">IT Equipment Rental</h1>
+          <h1 className="font-medium force-header-text flex items-center">IT Equipment Rental</h1>
         </div>
       </div>
       

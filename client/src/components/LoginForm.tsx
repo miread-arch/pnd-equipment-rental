@@ -81,10 +81,10 @@ export default function LoginForm({ onLogin }: LoginFormProps) {
         <CardHeader className="text-center">
           <div className="flex justify-center mb-8">
             <div className="hidden sm:block">
-              <PNDLogo size={120} />
+              <PNDLogo size={120} className="transform hover:scale-105 transition-transform duration-200" />
             </div>
             <div className="block sm:hidden">
-              <PNDLogo size={100} />
+              <PNDLogo size={100} className="transform hover:scale-105 transition-transform duration-200" />
             </div>
           </div>
           <CardTitle className="text-2xl mb-2">(주)피앤디아이앤씨</CardTitle>

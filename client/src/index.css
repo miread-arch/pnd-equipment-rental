@@ -2,6 +2,61 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Force logo sizing with highest specificity to override all other styles */
+.force-logo-40.force-logo-40.force-logo-40 {
+  width: 40px !important;
+  height: 40px !important;
+  min-width: 40px !important;
+  min-height: 40px !important;
+  max-width: 40px !important;
+  max-height: 40px !important;
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
+.force-logo-32.force-logo-32.force-logo-32 {
+  width: 32px !important;
+  height: 32px !important;
+  min-width: 32px !important;
+  min-height: 32px !important;
+  max-width: 32px !important;
+  max-height: 32px !important;
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
+.force-logo-text-40.force-logo-text-40.force-logo-text-40 {
+  font-size: 24px !important;
+  line-height: 40px !important;
+  font-weight: 900 !important;
+  width: 40px !important;
+  height: 40px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
+.force-logo-text-32.force-logo-text-32.force-logo-text-32 {
+  font-size: 19.2px !important;
+  line-height: 32px !important;
+  font-weight: 900 !important;
+  width: 32px !important;
+  height: 32px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
+.force-header-text.force-header-text.force-header-text {
+  height: 40px !important;
+  line-height: 40px !important;
+  font-size: 24px !important;
+}
+
 /* LIGHT MODE */
 :root {
   --button-outline: rgba(0,0,0, .10);

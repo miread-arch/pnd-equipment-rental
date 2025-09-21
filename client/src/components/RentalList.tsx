@@ -32,8 +32,8 @@ export default function RentalList({ rentals, showAllUsers = false, onUpdateStat
   const [filterCategory, setFilterCategory] = useState<string>("all");
   const [selectedRental, setSelectedRental] = useState<Rental | null>(null);
 
-  const statuses = ["신청중", "승인", "대여중", "반납완료", "거절"];
-  const categories = Array.from(new Set(rentals.map(rental => rental.category)));
+  const statuses = ["신청중", "승인", "대여중", "반납완료", "거절"].filter(s => s && s.trim() !== '');
+  const categories = Array.from(new Set(rentals.map(rental => rental.category).filter(cat => cat && cat.trim() !== '')));
 
   const filteredRentals = rentals.filter(rental => {
     const matchesStatus = filterStatus === "all" || rental.status === filterStatus;
@@ -97,7 +97,7 @@ export default function RentalList({ rentals, showAllUsers = false, onUpdateStat
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">전체 상태</SelectItem>
-                {statuses.map((status) => (
+                {statuses.filter(status => status && status.trim() !== '').map((status) => (
                   <SelectItem key={status} value={status}>{status}</SelectItem>
                 ))}
               </SelectContent>
@@ -109,7 +109,7 @@ export default function RentalList({ rentals, showAllUsers = false, onUpdateStat
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">전체 카테고리</SelectItem>
-                {categories.map((category) => (
+                {categories.filter(category => category && category.trim() !== '').map((category) => (
                   <SelectItem key={category} value={category}>{category}</SelectItem>
                 ))}
               </SelectContent>

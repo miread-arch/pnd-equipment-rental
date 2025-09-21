@@ -30,7 +30,7 @@ export default function RentalRequest({ availableItems, onSubmitRequest }: Renta
   const [expectedReturnDate, setExpectedReturnDate] = useState<Date>();
   const [note, setNote] = useState("");
 
-  const categories = Array.from(new Set(availableItems.map(item => item.category)));
+  const categories = Array.from(new Set(availableItems.map(item => item.category).filter(cat => cat && cat.trim() !== '')));
   const filteredItems = availableItems.filter(item => 
     !selectedCategory || item.category === selectedCategory
   );
@@ -75,7 +75,7 @@ export default function RentalRequest({ availableItems, onSubmitRequest }: Renta
               <div className="space-y-2">
                 <Label htmlFor="category">카테고리 *</Label>
                 <Select 
-                  value={selectedCategory} 
+                  value={selectedCategory || undefined} 
                   onValueChange={(value) => {
                     setSelectedCategory(value);
                     setSelectedItem(""); // Reset item selection when category changes
@@ -86,7 +86,7 @@ export default function RentalRequest({ availableItems, onSubmitRequest }: Renta
                     <SelectValue placeholder="카테고리 선택" />
                   </SelectTrigger>
                   <SelectContent>
-                    {categories.map((category) => (
+                    {categories.filter(category => category && category.trim() !== '').map((category) => (
                       <SelectItem key={category} value={category}>
                         {category}
                       </SelectItem>
@@ -99,7 +99,7 @@ export default function RentalRequest({ availableItems, onSubmitRequest }: Renta
                 <div className="space-y-2">
                   <Label htmlFor="item">물품 선택 *</Label>
                   <Select 
-                    value={selectedItem} 
+                    value={selectedItem || undefined} 
                     onValueChange={setSelectedItem}
                     required
                   >
@@ -107,7 +107,7 @@ export default function RentalRequest({ availableItems, onSubmitRequest }: Renta
                       <SelectValue placeholder="물품 선택" />
                     </SelectTrigger>
                     <SelectContent>
-                      {filteredItems.map((item) => (
+                      {filteredItems.filter(item => item.itemId && item.itemId.trim() !== '').map((item) => (
                         <SelectItem key={item.itemId} value={item.itemId}>
                           <div className="flex items-center gap-2">
                             <span>{item.name}</span>
