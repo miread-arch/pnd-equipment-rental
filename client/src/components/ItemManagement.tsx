@@ -42,7 +42,7 @@ export default function ItemManagement({ items, onAddItem, onUpdateItem, onDelet
     note: "",
   });
 
-  const categories = ["Router", "Switch", "Wireless", "트랜시버", "소모품"].filter(c => c && c.trim() !== '');
+  const categories = ["라우터", "스위치", "무선 제품군", "트랜시버", "소모품류"].filter(c => c && c.trim() !== '');
   const statuses = ["대여가능", "대여불가"].filter(s => s && s.trim() !== '');
 
   const filteredItems = items.filter(item => {
