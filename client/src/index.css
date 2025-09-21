@@ -59,8 +59,8 @@
 
 /* Header logo styling - BALANCED SIZE */
 .header-logo {
-  height: 40px !important;
-  min-height: 40px !important;
+  height: 6rem !important;
+  min-height: 6rem !important;
   image-rendering: crisp-edges;
   image-rendering: -webkit-optimize-contrast;
 }
