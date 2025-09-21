@@ -21,14 +21,14 @@ export default function Header({ user, onLogout }: HeaderProps) {
     <header className="flex items-center justify-between p-4 border-b bg-card">
       <div className="flex items-center gap-4">
         <SidebarTrigger data-testid="button-sidebar-toggle" />
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-4">
           <div className="hidden sm:block">
-            <PNDLogo size={40} />
+            <PNDLogo size={45} />
           </div>
           <div className="block sm:hidden">
-            <PNDLogo size={32} />
+            <PNDLogo size={36} />
           </div>
-          <h1 className="text-lg font-medium">P&D Inc - IT Equipment Rental</h1>
+          <h1 className="text-lg font-medium">IT Equipment Rental</h1>
         </div>
       </div>
       

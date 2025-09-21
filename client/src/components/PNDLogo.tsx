@@ -25,8 +25,10 @@ export default function PNDLogo({ size = 60, className = "" }: PNDLogoProps) {
     return () => window.removeEventListener('logo-updated', handleLogoUpdate);
   }, []);
 
-  // If custom logo exists, use it
+  // If custom logo exists, use it with high-quality rendering
   if (logoUrl) {
+    const isSvg = logoUrl.includes('data:image/svg') || logoUrl.includes('.svg');
+    
     return (
       <div 
         className={`flex items-center justify-center ${className}`}
@@ -40,14 +42,19 @@ export default function PNDLogo({ size = 60, className = "" }: PNDLogoProps) {
             width: `${size}px`, 
             height: `${size}px`,
             maxWidth: `${size}px`, 
-            maxHeight: `${size}px` 
+            maxHeight: `${size}px`,
+            imageRendering: 'auto',
+            filter: 'contrast(1.02) saturate(1.02)',
+            backgroundColor: 'transparent'
           }}
+          loading="eager"
+          decoding="sync"
         />
       </div>
     );
   }
 
-  // Default PND logo
+  // Default PND logo with enhanced quality
   return (
     <div 
       className={`flex items-center justify-center rounded-full ${className}`}
@@ -57,14 +64,18 @@ export default function PNDLogo({ size = 60, className = "" }: PNDLogoProps) {
         backgroundColor: '#3B82F6',
         minWidth: `${size}px`,
         minHeight: `${size}px`,
-        flexShrink: 0
+        flexShrink: 0,
+        filter: 'contrast(1.05) saturate(1.1)',
+        boxShadow: size > 60 ? '0 2px 8px rgba(0,0,0,0.1)' : 'none'
       }}
     >
       <span 
-        className="font-bold select-none text-black"
+        className="font-bold select-none text-white antialiased"
         style={{ 
-          fontSize: `${size * 0.3}px`, // Responsive font size based on logo size
-          lineHeight: '1'
+          fontSize: `${size * 0.3}px`,
+          lineHeight: '1',
+          textRendering: 'optimizeLegibility',
+          WebkitFontSmoothing: 'antialiased'
         }}
       >
         PND

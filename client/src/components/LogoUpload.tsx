@@ -58,7 +58,7 @@ export default function LogoUpload() {
         return;
       }
 
-      // For image files, resize to 60x60 while maintaining aspect ratio
+      // For image files, resize to maintain aspect ratio with high quality
       const img = new Image();
       img.onload = () => {
         const canvas = document.createElement('canvas');
@@ -74,14 +74,18 @@ export default function LogoUpload() {
           return;
         }
 
-        // Calculate dimensions to maintain aspect ratio
-        const maxSize = 60;
+        // Calculate dimensions to maintain aspect ratio - use higher resolution for quality
+        const maxSize = 200; // Higher resolution for better quality scaling
         const ratio = Math.min(maxSize / img.width, maxSize / img.height);
         const width = img.width * ratio;
         const height = img.height * ratio;
 
         canvas.width = maxSize;
         canvas.height = maxSize;
+        
+        // Enable high-quality image rendering
+        ctx.imageSmoothingEnabled = true;
+        ctx.imageSmoothingQuality = 'high';
         
         // Clear canvas with transparent background
         ctx.clearRect(0, 0, maxSize, maxSize);
@@ -92,7 +96,7 @@ export default function LogoUpload() {
         
         ctx.drawImage(img, x, y, width, height);
         
-        const resizedDataUrl = canvas.toDataURL('image/png');
+        const resizedDataUrl = canvas.toDataURL('image/png', 1.0); // Maximum quality
         localStorage.setItem('company-logo', resizedDataUrl);
         setCurrentLogo(resizedDataUrl);
         setIsUploading(false);
@@ -136,7 +140,7 @@ export default function LogoUpload() {
       <CardHeader>
         <CardTitle>회사 로고 관리</CardTitle>
         <CardDescription>
-          로그인 화면에 표시될 회사 로고를 설정합니다. JPG, PNG, SVG 파일을 지원하며, 60×60px 크기로 자동 조정됩니다.
+          시스템 전체에 표시될 회사 로고를 설정합니다.
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
@@ -189,10 +193,12 @@ export default function LogoUpload() {
         <div className="p-4 bg-muted rounded-lg">
           <h4 className="font-medium mb-2">로고 가이드라인</h4>
           <ul className="text-sm text-muted-foreground space-y-1">
-            <li>• 최적 크기: 60×60px (비율 유지하여 자동 조정)</li>
-            <li>• 투명 배경 권장 (PNG, SVG)</li>
+            <li>• 헤더 로고: 텍스트 높이와 동일 (약 40-45px 높이)</li>
+            <li>• 로그인 페이지: 120×120px (큰 사이즈로 임팩트)</li>
+            <li>• 투명 배경 지원 (PNG, SVG)</li>
             <li>• 간단하고 명확한 디자인 권장</li>
             <li>• 파일 크기: 5MB 이하</li>
+            <li>• 고해상도 이미지 권장 (벡터 또는 300dpi 이상)</li>
           </ul>
         </div>
       </CardContent>
