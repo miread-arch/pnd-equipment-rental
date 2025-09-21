@@ -4,7 +4,7 @@ import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
 // Enums
-export const categoryEnum = pgEnum("category", ["Router", "Switch", "Wireless", "트랜시버", "소모품"]);
+export const categoryEnum = pgEnum("category", ["라우터", "스위치", "무선 제품군", "트랜시버", "소모품류"]);
 export const statusEnum = pgEnum("status", ["대여가능", "대여불가"]);
 export const rentalStatusEnum = pgEnum("rental_status", ["신청중", "승인", "대여중", "반납완료", "거절"]);
 export const approvalStatusEnum = pgEnum("approval_status", ["승인", "거절", "대기"]);
