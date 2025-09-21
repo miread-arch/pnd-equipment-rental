@@ -48,7 +48,7 @@ Preferred communication style: Simple, everyday language.
 - **Dark Mode**: Built-in support with CSS custom properties
 
 ### Business Logic Architecture
-- **Equipment Categories**: Router, Switch, Wireless, 트랜시버, 소모품
+- **Equipment Categories**: 라우터, 스위치, 무선 제품군, 트랜시버, 소모품류
 - **Serial Number Management**: Required for hardware, optional for consumables
 - **Approval Workflow**: 
   - Single admin approval for hardware

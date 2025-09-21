@@ -41,7 +41,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // Validate serial number requirements by category
-      const isSerialRequired = validation.data.category !== "소모품";
+      const isSerialRequired = validation.data.category !== "소모품류";
       if (isSerialRequired && !validation.data.serialNumber?.trim()) {
         return res.status(400).json({ 
           error: "시리얼넘버는 필수입니다", 
@@ -64,7 +64,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Validate serial number requirements if category is being updated
       if (req.body.category) {
-        const isSerialRequired = req.body.category !== "소모품";
+        const isSerialRequired = req.body.category !== "소모품류";
         if (isSerialRequired && !req.body.serialNumber?.trim()) {
           return res.status(400).json({ 
             error: "시리얼넘버는 필수입니다", 
@@ -155,7 +155,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // Check for existing active rentals for non-consumable items
-      if (item.category !== "소모품") {
+      if (item.category !== "소모품류") {
         const existingRentals = await storage.getAllRentals();
         const activeRental = existingRentals.find(r => 
           r.itemId === item.itemId && 
@@ -174,10 +174,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Create approval record based on item category
       if (item) {
-        const requiresApproval = ["Router", "Switch", "Wireless", "트랜시버"].includes(item.category);
-        if (requiresApproval || item.category === "소모품") {
+        const requiresApproval = ["라우터", "스위치", "무선 제품군", "트랜시버"].includes(item.category);
+        if (requiresApproval || item.category === "소모품류") {
           // Determine approver based on category and business rules
-          const approverId = item.category === "소모품" ? "product-team-manager" : "tech-manager";
+          const approverId = item.category === "소모품류" ? "product-team-manager" : "tech-manager";
           
           await storage.createApproval({
             rentalId: rental.rentalId,

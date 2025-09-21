@@ -89,7 +89,7 @@ export default function ItemManagement({ items, onAddItem, onUpdateItem, onDelet
     });
   };
 
-  const isSerialRequired = formData.category && formData.category !== "소모품";
+  const isSerialRequired = formData.category && formData.category !== "소모품류";
 
   return (
     <div className="space-y-6">
@@ -165,8 +165,8 @@ export default function ItemManagement({ items, onAddItem, onUpdateItem, onDelet
                     placeholder={isSerialRequired ? "시리얼넘버 입력 (필수)" : "시리얼넘버 입력 (선택)"}
                     required={!!isSerialRequired}
                   />
-                  {formData.category === "소모품" && (
-                    <p className="text-xs text-muted-foreground">소모품은 시리얼넘버가 필요하지 않습니다.</p>
+                  {formData.category === "소모품류" && (
+                    <p className="text-xs text-muted-foreground">소모품류는 시리얼넘버가 필요하지 않습니다.</p>
                   )}
                 </div>
                 
