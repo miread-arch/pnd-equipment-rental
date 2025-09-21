@@ -80,10 +80,10 @@ export default function LoginForm({ onLogin }: LoginFormProps) {
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
           <div className="flex justify-center mb-8">
-            <div className="hidden sm:block">
+            <div className="hidden sm:block login-logo">
               <PNDLogo size={120} className="transform hover:scale-105 transition-transform duration-200" />
             </div>
-            <div className="block sm:hidden">
+            <div className="block sm:hidden login-logo">
               <PNDLogo size={100} className="transform hover:scale-105 transition-transform duration-200" />
             </div>
           </div>
