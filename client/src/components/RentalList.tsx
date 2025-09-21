@@ -7,22 +7,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { ClipboardList, Eye, Clock, CheckCircle, XCircle, AlertTriangle } from "lucide-react";
 import { format } from "date-fns";
-
-interface Rental {
-  rentalId: string;
-  itemName: string;
-  category: string;
-  userName: string;
-  department: string;
-  status: string;
-  createdAt: Date;
-  expectedReturnDate: Date;
-  actualReturnDate?: Date;
-  note?: string;
-}
+import { RentalWithDetails } from "@shared/schema";
 
 interface RentalListProps {
-  rentals: Rental[];
+  rentals: RentalWithDetails[];
   showAllUsers?: boolean;
   onUpdateStatus?: (rentalId: string, status: string) => void;
 }
@@ -30,14 +18,14 @@ interface RentalListProps {
 export default function RentalList({ rentals, showAllUsers = false, onUpdateStatus }: RentalListProps) {
   const [filterStatus, setFilterStatus] = useState<string>("all");
   const [filterCategory, setFilterCategory] = useState<string>("all");
-  const [selectedRental, setSelectedRental] = useState<Rental | null>(null);
+  const [selectedRental, setSelectedRental] = useState<RentalWithDetails | null>(null);
 
   const statuses = ["신청중", "승인", "대여중", "반납완료", "거절"].filter(s => s && s.trim() !== '');
-  const categories = Array.from(new Set(rentals.map(rental => rental.category).filter(cat => cat && cat.trim() !== '')));
+  const categories = Array.from(new Set(rentals.map(rental => rental.item?.category).filter(cat => cat && cat.trim() !== '')));
 
   const filteredRentals = rentals.filter(rental => {
     const matchesStatus = filterStatus === "all" || rental.status === filterStatus;
-    const matchesCategory = filterCategory === "all" || rental.category === filterCategory;
+    const matchesCategory = filterCategory === "all" || rental.item?.category === filterCategory;
     return matchesStatus && matchesCategory;
   });
 
@@ -63,7 +51,7 @@ export default function RentalList({ rentals, showAllUsers = false, onUpdateStat
     }
   };
 
-  const isOverdue = (rental: Rental) => {
+  const isOverdue = (rental: RentalWithDetails) => {
     if (rental.status !== "대여중") return false;
     return new Date() > rental.expectedReturnDate;
   };
@@ -137,20 +125,20 @@ export default function RentalList({ rentals, showAllUsers = false, onUpdateStat
                   >
                     <TableCell className="font-medium">
                       <div className="flex items-center gap-2">
-                        {rental.itemName}
+                        {rental.item?.name || 'N/A'}
                         {isOverdue(rental) && (
                           <AlertTriangle className="h-4 w-4 text-destructive" />
                         )}
                       </div>
                     </TableCell>
                     <TableCell>
-                      <Badge variant="outline">{rental.category}</Badge>
+                      <Badge variant="outline">{rental.item?.category || 'N/A'}</Badge>
                     </TableCell>
                     {showAllUsers && (
                       <TableCell>
                         <div>
-                          <p className="font-medium">{rental.userName}</p>
-                          <p className="text-sm text-muted-foreground">{rental.department}</p>
+                          <p className="font-medium">{rental.user?.name || 'N/A'}</p>
+                          <p className="text-sm text-muted-foreground">{rental.user?.department || 'N/A'}</p>
                         </div>
                       </TableCell>
                     )}
@@ -197,11 +185,11 @@ export default function RentalList({ rentals, showAllUsers = false, onUpdateStat
                               <div className="grid grid-cols-2 gap-4">
                                 <div>
                                   <p className="text-sm text-muted-foreground">물품명</p>
-                                  <p className="font-medium">{selectedRental.itemName}</p>
+                                  <p className="font-medium">{selectedRental.item?.name || 'N/A'}</p>
                                 </div>
                                 <div>
                                   <p className="text-sm text-muted-foreground">카테고리</p>
-                                  <Badge variant="outline">{selectedRental.category}</Badge>
+                                  <Badge variant="outline">{selectedRental.item?.category || 'N/A'}</Badge>
                                 </div>
                               </div>
                               
@@ -209,11 +197,11 @@ export default function RentalList({ rentals, showAllUsers = false, onUpdateStat
                                 <div className="grid grid-cols-2 gap-4">
                                   <div>
                                     <p className="text-sm text-muted-foreground">신청자</p>
-                                    <p className="font-medium">{selectedRental.userName}</p>
+                                    <p className="font-medium">{selectedRental.user?.name || 'N/A'}</p>
                                   </div>
                                   <div>
                                     <p className="text-sm text-muted-foreground">부서</p>
-                                    <p className="font-medium">{selectedRental.department}</p>
+                                    <p className="font-medium">{selectedRental.user?.department || 'N/A'}</p>
                                   </div>
                                 </div>
                               )}
@@ -254,12 +242,6 @@ export default function RentalList({ rentals, showAllUsers = false, onUpdateStat
                                 </div>
                               )}
                               
-                              {selectedRental.note && (
-                                <div>
-                                  <p className="text-sm text-muted-foreground">비고</p>
-                                  <p className="text-sm">{selectedRental.note}</p>
-                                </div>
-                              )}
                               
                               {onUpdateStatus && selectedRental.status === "신청중" && (
                                 <div className="flex gap-2 pt-4 border-t">

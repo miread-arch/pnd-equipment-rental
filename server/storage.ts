@@ -78,6 +78,86 @@ export class MemStorage implements IStorage {
     sampleItems.forEach(item => {
       this.items.set(item.itemId, item);
     });
+
+    // Sample users
+    const sampleUsers: User[] = [
+      {
+        daouId: "admin",
+        name: "관리자",
+        department: "상품운용팀",
+        role: "admin",
+        email: "admin@company.com",
+        createdAt: new Date()
+      },
+      {
+        daouId: "user001",
+        name: "이회원",
+        department: "상품운용팀",
+        role: "user",
+        email: "user001@company.com",
+        createdAt: new Date()
+      },
+      {
+        daouId: "user002",
+        name: "박기술",
+        department: "기술1팀",
+        role: "user",
+        email: "user002@company.com",
+        createdAt: new Date()
+      }
+    ];
+
+    sampleUsers.forEach(user => {
+      this.users.set(user.daouId, user);
+    });
+
+    // Sample rentals
+    const sampleRentals: Rental[] = [
+      {
+        rentalId: "rental-1",
+        itemId: "item-1",
+        userId: "user001",
+        status: "대여중",
+        rentalDate: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000), // 3 days ago
+        expectedReturnDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days from now
+        actualReturnDate: null,
+        createdAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000) // 3 days ago
+      },
+      {
+        rentalId: "rental-2",
+        itemId: "item-3",
+        userId: "user002",
+        status: "신청중",
+        rentalDate: null,
+        expectedReturnDate: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000), // 14 days from now
+        actualReturnDate: null,
+        createdAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000) // 1 day ago
+      },
+      {
+        rentalId: "rental-3",
+        itemId: "item-5",
+        userId: "user001",
+        status: "반납완료",
+        rentalDate: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000), // 10 days ago
+        expectedReturnDate: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000), // 1 day ago
+        actualReturnDate: new Date(),
+        createdAt: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000) // 10 days ago
+      },
+      {
+        rentalId: "rental-4",
+        itemId: "item-9",
+        userId: "user002",
+        status: "승인",
+        rentalDate: null,
+        expectedReturnDate: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000), // 3 days from now
+        actualReturnDate: null,
+        createdAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000) // 2 days ago
+      }
+    ];
+
+    sampleRentals.forEach(rental => {
+      this.rentals.set(rental.rentalId, rental);
+    });
   }
 
   // User methods
