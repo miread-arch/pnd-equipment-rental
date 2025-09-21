@@ -55,24 +55,24 @@ export class MemStorage implements IStorage {
     // Sample items for each category
     const sampleItems: (Item)[] = [
       // Router
-      { itemId: "item-1", category: "Router", name: "HUAWEI AR6120", model: "AR6120", serialNumber: "HW001234", status: "대여가능", note: "고성능 라우터", createdBy: "admin", createdAt: new Date() },
-      { itemId: "item-2", category: "Router", name: "Cisco ISR 4321", model: "ISR4321", serialNumber: "CS001234", status: "대여가능", note: null, createdBy: "admin", createdAt: new Date() },
+      { itemId: "item-1", category: "라우터", name: "HUAWEI AR6120", model: "AR6120", serialNumber: "HW001234", status: "대여가능", note: "고성능 라우터", createdBy: "admin", createdAt: new Date() },
+      { itemId: "item-2", category: "라우터", name: "Cisco ISR 4321", model: "ISR4321", serialNumber: "CS001234", status: "대여가능", note: null, createdBy: "admin", createdAt: new Date() },
       
       // Switch
-      { itemId: "item-3", category: "Switch", name: "Cisco Catalyst 2960", model: "C2960-24TT-L", serialNumber: "CS002345", status: "대여가능", note: "24포트 스위치", createdBy: "admin", createdAt: new Date() },
-      { itemId: "item-4", category: "Switch", name: "HP ProCurve 2910", model: "J9145A", serialNumber: "HP002345", status: "대여불가", note: null, createdBy: "admin", createdAt: new Date() },
+      { itemId: "item-3", category: "스위치", name: "Cisco Catalyst 2960", model: "C2960-24TT-L", serialNumber: "CS002345", status: "대여가능", note: "24포트 스위치", createdBy: "admin", createdAt: new Date() },
+      { itemId: "item-4", category: "스위치", name: "HP ProCurve 2910", model: "J9145A", serialNumber: "HP002345", status: "대여불가", note: null, createdBy: "admin", createdAt: new Date() },
       
       // Wireless
-      { itemId: "item-5", category: "Wireless", name: "Cisco Aironet 2802", model: "AIR-AP2802I", serialNumber: "CS003456", status: "대여가능", note: "실내용 AP", createdBy: "admin", createdAt: new Date() },
-      { itemId: "item-6", category: "Wireless", name: "Ubiquiti UniFi AP", model: "U6-Lite", serialNumber: "UB003456", status: "대여가능", note: null, createdBy: "admin", createdAt: new Date() },
+      { itemId: "item-5", category: "무선 제품군", name: "Cisco Aironet 2802", model: "AIR-AP2802I", serialNumber: "CS003456", status: "대여가능", note: "실내용 AP", createdBy: "admin", createdAt: new Date() },
+      { itemId: "item-6", category: "무선 제품군", name: "Ubiquiti UniFi AP", model: "U6-Lite", serialNumber: "UB003456", status: "대여가능", note: null, createdBy: "admin", createdAt: new Date() },
       
       // 트랜시버
       { itemId: "item-7", category: "트랜시버", name: "SFP+ 10G 모듈", model: "SFP-10G-SR", serialNumber: "SF004567", status: "대여가능", note: "멀티모드 광모듈", createdBy: "admin", createdAt: new Date() },
       { itemId: "item-8", category: "트랜시버", name: "QSFP+ 40G 모듈", model: "QSFP-40G-SR4", serialNumber: "QS004567", status: "대여가능", note: null, createdBy: "admin", createdAt: new Date() },
       
       // 소모품
-      { itemId: "item-9", category: "소모품", name: "LC-LC 광점퍼코드", model: null, serialNumber: null, status: "대여가능", note: "3미터", createdBy: "admin", createdAt: new Date() },
-      { itemId: "item-10", category: "소모품", name: "이더넷 케이블", model: "CAT6", serialNumber: null, status: "대여가능", note: "5미터", createdBy: "admin", createdAt: new Date() },
+      { itemId: "item-9", category: "소모품류", name: "LC-LC 광점퍼코드", model: null, serialNumber: null, status: "대여가능", note: "3미터", createdBy: "admin", createdAt: new Date() },
+      { itemId: "item-10", category: "소모품류", name: "이더넷 케이블", model: "CAT6", serialNumber: null, status: "대여가능", note: "5미터", createdBy: "admin", createdAt: new Date() },
     ];
     
     sampleItems.forEach(item => {
