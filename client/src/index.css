@@ -52,15 +52,17 @@
 }
 
 .force-header-text.force-header-text.force-header-text {
-  height: 40px !important;
-  line-height: 40px !important;
-  font-size: 24px !important;
+  height: 6rem !important;
+  line-height: 6rem !important;
+  font-size: 48px !important;
 }
 
-/* Header logo styling - BALANCED SIZE */
+/* Header logo styling - LARGE SIZE */
 .header-logo {
-  height: 6rem !important;
-  min-height: 6rem !important;
+  height: 8rem !important;
+  min-height: 8rem !important;
+  width: 8rem !important;
+  min-width: 8rem !important;
   image-rendering: crisp-edges;
   image-rendering: -webkit-optimize-contrast;
 }
