@@ -59,10 +59,10 @@
 
 /* Header logo styling - LARGER SIZE */
 .header-logo {
-  height: 60px !important;
-  min-height: 60px !important;
-  width: 60px !important;
-  min-width: 60px !important;
+  height: 70px !important;
+  min-height: 70px !important;
+  width: 70px !important;
+  min-width: 70px !important;
   image-rendering: crisp-edges;
   image-rendering: -webkit-optimize-contrast;
 }
