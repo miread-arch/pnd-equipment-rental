@@ -2,7 +2,7 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { insertItemSchema, insertRentalSchema, insertApprovalSchema } from "@shared/schema";
-import { sendEmail, emailTemplates } from "./email";
+import { sendEmail, emailTemplates, getEmailLogs } from "./email";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Items API
@@ -453,6 +453,256 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(categoryStats);
     } catch (error) {
       res.status(500).json({ error: "Failed to fetch category stats" });
+    }
+  });
+
+  // Email logs API (Admin only)
+  app.get("/api/emails/logs", async (req, res) => {
+    try {
+      const { date } = req.query;
+      const logs = getEmailLogs(date as string);
+      res.json(logs);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch email logs" });
+    }
+  });
+
+  // Email preview API (Admin only)
+  app.post("/api/emails/preview", async (req, res) => {
+    try {
+      const { type, userName, itemName, expectedReturnDate, reason, daysLeft, daysOverdue } = req.body;
+      
+      let template;
+      const returnDate = expectedReturnDate ? new Date(expectedReturnDate) : new Date();
+      
+      switch (type) {
+        case 'rentalRequest':
+          template = emailTemplates.rentalRequest(userName || '홍길동', itemName || 'Test Router', returnDate);
+          break;
+        case 'rentalApproved':
+          template = emailTemplates.rentalApproved(userName || '홍길동', itemName || 'Test Router', returnDate);
+          break;
+        case 'rentalRejected':
+          template = emailTemplates.rentalRejected(userName || '홍길동', itemName || 'Test Router', reason);
+          break;
+        case 'returnReminder':
+          template = emailTemplates.returnReminder(userName || '홍길동', itemName || 'Test Router', returnDate, daysLeft || 3);
+          break;
+        case 'overdue':
+          template = emailTemplates.overdue(userName || '홍길동', itemName || 'Test Router', returnDate, daysOverdue || 2);
+          break;
+        default:
+          return res.status(400).json({ error: "Invalid email type" });
+      }
+      
+      res.json(template);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to generate email preview" });
+    }
+  });
+
+  // Email configuration status API
+  app.get("/api/emails/config", async (req, res) => {
+    try {
+      const config = {
+        enabled: process.env.EMAIL_ENABLED === 'true',
+        host: process.env.SMTP_HOST || 'outbound.daouoffice.com',
+        port: process.env.SMTP_PORT || '465',
+        from: process.env.EMAIL_FROM || 'noreply@pndinc.co.kr',
+        userConfigured: !!process.env.SMTP_USER,
+        passwordConfigured: !!process.env.SMTP_PASSWORD
+      };
+      res.json(config);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch email configuration" });
+    }
+  });
+
+  // Return reminder API - Check rentals due for return
+  app.get("/api/emails/return-reminders", async (req, res) => {
+    try {
+      const { days } = req.query;
+      const reminderDays = parseInt(days as string) || 3; // Default 3 days before due
+      
+      const allRentals = await storage.getAllRentals();
+      const activeRentals = allRentals.filter(r => r.status === "대여중");
+      
+      const now = new Date();
+      const targetDate = new Date();
+      targetDate.setDate(now.getDate() + reminderDays);
+      
+      const rentalsNearDue = activeRentals.filter(rental => {
+        const dueDate = new Date(rental.expectedReturnDate);
+        const diffTime = dueDate.getTime() - now.getTime();
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        return diffDays <= reminderDays && diffDays > 0;
+      });
+      
+      // Get user info for each rental
+      const rentalDetails = await Promise.all(
+        rentalsNearDue.map(async (rental) => {
+          const user = await storage.getUserByDaouId(rental.userId);
+          const item = await storage.getItemById(rental.itemId);
+          const dueDate = new Date(rental.expectedReturnDate);
+          const diffTime = dueDate.getTime() - now.getTime();
+          const daysLeft = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+          
+          return {
+            rental,
+            user,
+            item,
+            daysLeft
+          };
+        })
+      );
+      
+      res.json(rentalDetails);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch return reminders" });
+    }
+  });
+
+  // Send return reminder emails
+  app.post("/api/emails/send-return-reminders", async (req, res) => {
+    try {
+      const { rentalIds } = req.body;
+      
+      if (!Array.isArray(rentalIds)) {
+        return res.status(400).json({ error: "rentalIds must be an array" });
+      }
+      
+      const results = [];
+      const now = new Date();
+      
+      for (const rentalId of rentalIds) {
+        const rental = await storage.getRentalById(rentalId);
+        if (!rental || rental.status !== "대여중") {
+          results.push({ rentalId, success: false, error: "Invalid rental" });
+          continue;
+        }
+        
+        const user = await storage.getUserByDaouId(rental.userId);
+        const item = await storage.getItemById(rental.itemId);
+        
+        if (!user || !item) {
+          results.push({ rentalId, success: false, error: "User or item not found" });
+          continue;
+        }
+        
+        const dueDate = new Date(rental.expectedReturnDate);
+        const diffTime = dueDate.getTime() - now.getTime();
+        const daysLeft = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        
+        const template = emailTemplates.returnReminder(
+          user.name,
+          item.name,
+          rental.expectedReturnDate,
+          daysLeft
+        );
+        
+        const success = await sendEmail({
+          to: user.email,
+          subject: template.subject,
+          text: template.text,
+          html: template.html
+        });
+        
+        results.push({ rentalId, success, userName: user.name, itemName: item.name, daysLeft });
+      }
+      
+      res.json({ results });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to send return reminders" });
+    }
+  });
+
+  // Overdue rentals API
+  app.get("/api/emails/overdue-rentals", async (req, res) => {
+    try {
+      const allRentals = await storage.getAllRentals();
+      const activeRentals = allRentals.filter(r => r.status === "대여중");
+      
+      const now = new Date();
+      const overdueRentals = activeRentals.filter(rental => {
+        const dueDate = new Date(rental.expectedReturnDate);
+        return now > dueDate;
+      });
+      
+      // Get user info for each overdue rental
+      const overdueDetails = await Promise.all(
+        overdueRentals.map(async (rental) => {
+          const user = await storage.getUserByDaouId(rental.userId);
+          const item = await storage.getItemById(rental.itemId);
+          const dueDate = new Date(rental.expectedReturnDate);
+          const diffTime = now.getTime() - dueDate.getTime();
+          const daysOverdue = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+          
+          return {
+            rental,
+            user,
+            item,
+            daysOverdue
+          };
+        })
+      );
+      
+      res.json(overdueDetails);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch overdue rentals" });
+    }
+  });
+
+  // Send overdue reminder emails
+  app.post("/api/emails/send-overdue-reminders", async (req, res) => {
+    try {
+      const { rentalIds } = req.body;
+      
+      if (!Array.isArray(rentalIds)) {
+        return res.status(400).json({ error: "rentalIds must be an array" });
+      }
+      
+      const results = [];
+      const now = new Date();
+      
+      for (const rentalId of rentalIds) {
+        const rental = await storage.getRentalById(rentalId);
+        if (!rental || rental.status !== "대여중") {
+          results.push({ rentalId, success: false, error: "Invalid rental" });
+          continue;
+        }
+        
+        const user = await storage.getUserByDaouId(rental.userId);
+        const item = await storage.getItemById(rental.itemId);
+        
+        if (!user || !item) {
+          results.push({ rentalId, success: false, error: "User or item not found" });
+          continue;
+        }
+        
+        const dueDate = new Date(rental.expectedReturnDate);
+        const diffTime = now.getTime() - dueDate.getTime();
+        const daysOverdue = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        
+        const template = emailTemplates.overdue(
+          user.name,
+          item.name,
+          rental.expectedReturnDate,
+          daysOverdue
+        );
+        
+        const success = await sendEmail({
+          to: user.email,
+          subject: template.subject,
+          text: template.text,
+          html: template.html
+        });
+        
+        results.push({ rentalId, success, userName: user.name, itemName: item.name, daysOverdue });
+      }
+      
+      res.json({ results });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to send overdue reminders" });
     }
   });
 

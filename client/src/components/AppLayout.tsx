@@ -13,6 +13,7 @@ import ItemManagement from "./ItemManagement";
 import RentalRequest from "./RentalRequest";
 import RentalList from "./RentalList";
 import SystemSettings from "./SystemSettings";
+import EmailManagement from "./EmailManagement";
 import type { RentalWithDetails, Item, InsertItem } from "@shared/schema";
 
 interface User {
@@ -271,6 +272,12 @@ export default function AppLayout() {
                 {user.role === "admin" && (
                   <Route path="/settings">
                     <SystemSettings />
+                  </Route>
+                )}
+                
+                {user.role === "admin" && (
+                  <Route path="/emails">
+                    <EmailManagement />
                   </Route>
                 )}
                 

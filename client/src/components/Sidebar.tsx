@@ -17,7 +17,8 @@ import {
   Users, 
   Settings,
   PlusCircle,
-  CheckSquare
+  CheckSquare,
+  Mail
 } from "lucide-react";
 
 interface SidebarProps {
@@ -61,6 +62,11 @@ export default function AppSidebar({ userRole }: SidebarProps) {
       title: "승인 처리",
       url: "/approvals",
       icon: CheckSquare,
+    },
+    {
+      title: "이메일 관리",
+      url: "/emails",
+      icon: Mail,
     },
     {
       title: "사용자 관리",
